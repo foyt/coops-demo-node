@@ -1,0 +1,21 @@
+{
+  "author": "Antti LeppŠ (Foyt)",
+  "name": "coops-demo-node",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/anttileppa/coops-demo-node.git"
+  },
+  "engines": {
+    "node": ">0.4.0"
+  },
+  "dependencies": {
+    "express": "3.x",
+    "mongodb": "1.2.12",
+    "mongoose": "3.5.6",
+    "passport": "0.1.16",
+    "passport-facebook": "0.1.5",
+    "jade": "*",
+    "restler": "*"
+  }
+}
