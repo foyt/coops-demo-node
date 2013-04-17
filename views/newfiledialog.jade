@@ -1,0 +1,11 @@
+div(id="new-file-dialog",class="dialog")
+  h3
+    |#{title}
+  div(class="dialog-field")
+    label
+      |Name
+    input(type="text")
+    input(type="hidden",name="type",value="#{type}")
+  div(class="dialog-buttons")
+    input(type="submit",value="Cancel",name="cancel")
+    input(type="submit",value="Create",name="create")

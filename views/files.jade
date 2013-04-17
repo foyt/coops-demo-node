@@ -1,0 +1,30 @@
+extend layout
+block header
+  a(href="/auth/logout")
+    | Logout
+block content
+  img(src="/gfx/files.png",class="view-image") 
+  h2 
+    | Files
+  p(class="info-text")
+    | Your files
+  div(class="view-tools")
+    a(class="view-tool",href="javascript:void(null)",onclick="openNewFileDialog(event)",data-type="ckeditor")
+      img(src="/gfx/ckeditor-icon.png")
+      |New Document (CKEditor)
+  div(class="list")
+    each file in files
+      div(class="list-item")
+        |#{file.name}
+        if ((file.role == 'OWNER')||(file.role == 'WRITER'))
+          a(class="list-action",href="/files/#{file.id}/edit/ckeditor")
+            |Edit
+        if ((file.role == 'READER'))
+          a(class="list-action",href="/files/#{file.id}/view")
+            |View
+block footer
+  div(class="footer-left")
+    a(href="https://github.com/anttileppa/coops-server-node")
+      | https://github.com/anttileppa/coops-server-node
+  div(class="footer-right")
+    | Icons from Crystal Clear and Kids iconsets by Everaldo Coelho and Free Social Icons iconset by Neil Hainsworth

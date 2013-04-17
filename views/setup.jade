@@ -1,0 +1,49 @@
+extend layout
+block header
+block content
+  img(src="/gfx/setup.png",class="view-image") 
+  h2
+    |Setup
+  p(class="info-text")
+    |Setup CoOps client
+  form(action="/setup",method="post")
+    h3
+      |Co-Ops Server
+    div
+      label
+        |Co-Ops Server
+      input(name="coops-server",type="text",value="#{settings['coops-server']||''}")
+    div
+      label
+        |Co-Ops Client Id
+      input(name="coops-client-id",type="text",value="#{settings['coops-client-id']||''}")
+    div
+      label
+        |Co-Ops Client Secret
+      input(name="coops-client-secret",type="text",value="#{settings['coops-client-secret']||''}")
+    h3
+      |Facebook
+    div
+      label
+        |Facebook Client Id
+      input(name="facebook-client-id",type="text",value="#{settings['facebook-client-id']||''}")
+    div
+      label
+        |Facebook Client Secret
+      input(name="facebook-client-secret",type="text",value="#{settings['facebook-client-secret']||''}")
+    h3
+      |GitHub
+    div
+      label
+        |GitHub Client Id
+      input(name="github-client-id",type="text",value="#{settings['github-client-id']||''}")
+    div
+      label
+        |GitHub Client Secret
+      input(name="github-client-secret",type="text",value="#{settings['github-client-secret']||''}")
+      
+    input(type="submit", value="Save")
+block footer
+  div(class="footer-left")
+    a(href="https://github.com/anttileppa/coops-server-node")
+      | https://github.com/anttileppa/coops-server-node
