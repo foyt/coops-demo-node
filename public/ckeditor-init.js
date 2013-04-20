@@ -33,8 +33,8 @@ $(document).ready(function() {
       // pasteLoremIpsumInterval:
       pasteLoremIpsumBlockSize: 10,
       
-      selectionChange: true,
-      selectionChangeInterval: 1000
+      selectionChange: false,
+      selectionChangeInterval: 10000
       
     }
   }, 'Content loading...');
