@@ -240,7 +240,7 @@
 	  
 	    var scripts = [
 	      editor.plugins['coops-dmp'].path + 'required/diff_match_patch.js', 
-	      editor.plugins['coops-dmp'].path + 'required/diffxmljs-uncompressed.js',
+	      editor.plugins['coops-dmp'].path + 'required/diffxmljs.js',
 	      editor.plugins['coops-dmp'].path + 'required/crc.js',
 	    ];
 	
