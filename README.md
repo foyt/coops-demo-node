@@ -6,7 +6,7 @@ Up to date documentation
 Introduction
 ============
 
-This is a example of client for coops-server-node (http://github.com/foyt/coops-demo-node/). 
+This is a example of client for coops-server-node (http://github.com/foyt/coops-server-node/). 
 
 Install
 =======
