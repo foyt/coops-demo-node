@@ -66,12 +66,16 @@
   };
   
   module.exports.fileEditCKEditor = function (req, res) {
-    var fileId = req.params.fileId;
-    
-    res.render('edit_ckeditor', { 
-      fileId: fileId,
-      title: 'Dokumentti - otsake'
-    });
+    if (!req.user) {
+      res.redirect('/');
+    } else {
+	  var fileId = req.params.fileId;
+
+	  res.render('edit_ckeditor', { 
+	    fileId: fileId,
+	    title: 'Dokumentti - otsake'
+	  });
+	}
   };
   
   module.exports.fileView = function (req, res) {
