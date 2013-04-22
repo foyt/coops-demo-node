@@ -9,8 +9,7 @@ var passport = require('passport');
 var auth = require('./auth');
 var views = require('./views');
 var api = require('./api');
-
-var serverPort = 8080;
+var config = require('./config');
 var apiClient = require('./apiclient');
 
 app.configure(function () {
@@ -103,4 +102,4 @@ app.configure(function () {
   
 });
 
-server.listen(serverPort);
+server.listen(config.port);

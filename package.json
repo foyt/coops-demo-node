@@ -1,5 +1,5 @@
 {
-  "author": "Foyt",
+  "author": "Antti Leppä / Foyt",
   "name": "coops-demo-node",
   "version": "0.0.1",
   "repository": {
@@ -19,5 +19,9 @@
     "jade": "*",
     "restler": "*",
     "underscore": "*"
+  },
+  "subdomain": "coops-demo-node",
+  "scripts": {
+    "start": "node app.js"
   }
 }
