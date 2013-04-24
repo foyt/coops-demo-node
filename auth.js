@@ -144,59 +144,63 @@
   settings.get(['facebook-client-id', 'facebook-client-secret'], function (err, settings) {
     var settingMap = _.object(_.pluck(settings, 'key'), _.pluck(settings, 'value'));
   
-    passport.use(new FacebookStrategy({
-        clientID: settingMap['facebook-client-id'],
-        clientSecret: settingMap['facebook-client-secret'],
-        callbackURL: "/auth/facebook/callback"
-      },
-      function(accessToken, refreshToken, profile, done) {
-        process.nextTick(function(){
-          var identifier = 'facebook-' + profile.id;
-          var emails = _.pluck(profile.emails, 'value');
-
-          loginUser(identifier, emails, profile.name, function (err, user) {
-            loginCoOps(user, function (err) {
-              done(err, user);              
-            });
-          });
-        });
-      }
-    ));
+    if (settingMap['facebook-client-id'] && settingMap['facebook-client-secret']) {
+	  passport.use(new FacebookStrategy({
+	      clientID: settingMap['facebook-client-id'],
+	      clientSecret: settingMap['facebook-client-secret'],
+	      callbackURL: "/auth/facebook/callback"
+	    },
+	    function(accessToken, refreshToken, profile, done) {
+	      process.nextTick(function(){
+	        var identifier = 'facebook-' + profile.id;
+	        var emails = _.pluck(profile.emails, 'value');
+	
+	        loginUser(identifier, emails, profile.name, function (err, user) {
+	          loginCoOps(user, function (err) {
+	            done(err, user);              
+	          });
+	        });
+	      });
+	    }
+	  ));
+    }
   });
   
   settings.get(['github-client-id', 'github-client-secret'], function (err, settings) {
     var settingMap = _.object(_.pluck(settings, 'key'), _.pluck(settings, 'value'));
   
-    passport.use(new GitHubStrategy({
-        clientID: settingMap['github-client-id'],
-        clientSecret: settingMap['github-client-secret'],
-        callbackURL: "/auth/github/callback"
-      },
-      function(accessToken, refreshToken, profile, done) {
-        process.nextTick(function(){
-          var identifier = 'github-' + profile.id;
-          var emails = _.pluck(profile.emails, 'value');
+    if (settingMap['github-client-id'] && settingMap['github-client-secret']) {
+      passport.use(new GitHubStrategy({
+          clientID: settingMap['github-client-id'],
+          clientSecret: settingMap['github-client-secret'],
+          callbackURL: "/auth/github/callback"
+        },
+        function(accessToken, refreshToken, profile, done) {
+          process.nextTick(function(){
+            var identifier = 'github-' + profile.id;
+            var emails = _.pluck(profile.emails, 'value');
 
-          rest.get('https://api.github.com/user/emails', {
-            headers: {
-              'Accept': 'application/vnd.github.v3',
-              'Authorization': 'token ' + accessToken
-            }
-          }).on('complete', function(result) {
-  			if (result instanceof Error) {
-  			  done(result, null);
-  			} else {
-  			  var emails = _.pluck(result, 'email');
-  			  loginUser(identifier, emails, profile.name, function (err, user) {
-	            loginCoOps(user, function (err) {
-	              done(err, user);              
+            rest.get('https://api.github.com/user/emails', {
+              headers: {
+                'Accept': 'application/vnd.github.v3',
+                'Authorization': 'token ' + accessToken
+              }
+            }).on('complete', function(result) {
+  			  if (result instanceof Error) {
+  			    done(result, null);
+  			  } else {
+  			    var emails = _.pluck(result, 'email');
+  			    loginUser(identifier, emails, profile.name, function (err, user) {
+	              loginCoOps(user, function (err) {
+	                done(err, user);              
+	              });
 	            });
-	          });
-  			}
-	      });
-        });
-      }
-    ));
+  			  }
+	        });
+          });
+        }
+      ));
+    }
   });
   
 }).call(this);
