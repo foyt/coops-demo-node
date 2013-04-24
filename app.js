@@ -101,4 +101,4 @@ app.configure(function () {
   
 });
 
-server.listen(process.env.NODE_ENV == 'production' ? 80 : 8080);
+server.listen(process.env.PORT_COOPS_DEMO || process.env.PORT ||8080);
