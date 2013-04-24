@@ -9,7 +9,6 @@ var passport = require('passport');
 var auth = require('./auth');
 var views = require('./views');
 var api = require('./api');
-var config = require('./config');
 var apiClient = require('./apiclient');
 
 app.configure(function () {
