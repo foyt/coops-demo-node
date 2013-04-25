@@ -112,8 +112,7 @@
           if (response.statusCode >= 200 && response.statusCode <= 299) {
             var resp = data['response'];
             if (!resp) {
-              console.error("Invalid response from CoOPS server: " + data);
-              callback("Invalid response from CoOPS server.");
+              callback("Invalid response from CoOPS server:" + data);
             } else {
 	          var tokenResponse = resp['access_token'];
 	          
