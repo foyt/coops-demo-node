@@ -18,7 +18,7 @@
     "passport-github": "*",
     "jade": "*",
     "restler": "2.0.1",
-    "underscore": "*"
+    "underscore": "1.4.4"
   },
   "subdomain": "coops-demo-node",
   "scripts": {
