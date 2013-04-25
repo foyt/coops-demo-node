@@ -17,7 +17,7 @@
     "passport-facebook": "0.1.5",
     "passport-github": "*",
     "jade": "*",
-    "restler": "*",
+    "restler": "2.0.1",
     "underscore": "*"
   },
   "subdomain": "coops-demo-node",
