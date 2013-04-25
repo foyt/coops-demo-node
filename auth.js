@@ -111,16 +111,21 @@
         client.createUser(user.name).on('complete', function(data, response) {
           if (response.statusCode >= 200 && response.statusCode <= 299) {
             var resp = data['response'];
-            var tokenResponse = resp['access_token'];
-          
-            user.userId = resp['user_id'];
-            user.accessToken = tokenResponse['access_token'];
-            user.refreshToken = tokenResponse['refresh_token'];
-            user.tokenExpires = new Date().getTime() + tokenResponse['expires_in'];
-          
-            user.save(function (err, user) {
-              callback(err);
-            });
+            if (!resp) {
+              console.error(["Invalid response from CoOPS server", response]);
+              callback("Invalid response from CoOPS server.");
+            } else {
+	          var tokenResponse = resp['access_token'];
+	          
+	          user.userId = resp['user_id'];
+	          user.accessToken = tokenResponse['access_token'];
+	          user.refreshToken = tokenResponse['refresh_token'];
+	          user.tokenExpires = new Date().getTime() + tokenResponse['expires_in'];
+	          
+	          user.save(function (err, user) {
+	            callback(err);
+	          });
+            }
           } else {
             callback("Could not connect to Co-Ops Server.");
           }
