@@ -105,9 +105,6 @@
                     revertedContent = localPatchResult[0];
                   }
                 }
-                  
-                // var dbg = editor.document.$.defaultView.frameElement.ownerDocument.getElementById('debug');
-                // dbg.innerHTML = _this._diffMatchPatch.diff_prettyHtml(_this._diffMatchPatch.diff_main(editor.getData(), content));
                 
                 try {
                   _this._applyChanges(currentContent, revertedContent);
@@ -130,8 +127,7 @@
             var editor = this.getEditor();
             try {
 	            editor.getChangeObserver().pause();
-              editor.lockSelection();               
-              editor.setReadOnly(true);
+              editor.lockSelection();  
             } catch (e) {
             }
 	        },
@@ -141,8 +137,7 @@
 	          
 	          try {
               editor.getChangeObserver().reset();
-              editor.getChangeObserver().resume();                  
-              editor.setReadOnly(false);
+              editor.getChangeObserver().resume();  
               editor.unlockSelection(true);
 	          } catch (e) {
 	          }
