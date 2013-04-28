@@ -243,7 +243,14 @@ CKEDITOR.plugins.add('coops-ws', {
 
           this._revisionNumber = event.data.revisionNumber;
           
-          this._webSocket = new (window.WebSocket || window.MozWebSocket)(joinData.webSocketUrl);
+          if ((typeof window.WebSocket) == 'function') {
+            this._webSocket = new window.WebSocket(joinData.webSocketUrl);
+          } else if ((typeof window.MozWebSocket) == 'function') {
+            this._webSocket = new window.MozWebSocket(joinData.webSocketUrl);
+          } else {
+            throw new Error("Browser does not support WebSocket.");
+          }          
+
           this.getEditor().fire("CoOPS:WebSocketConnect");
 
           var _this = this;
