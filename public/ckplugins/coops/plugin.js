@@ -242,7 +242,7 @@ CKEDITOR.coops.CoOps = CKEDITOR.tools.createClass({
         revisionNumber: revisionNumber
       });
       
-      this.getEditor().on('selectionCheck', this._onSelectionCheck, this);
+      // this.getEditor().on('selectionCheck', this._onSelectionCheck, this);
     },
     _onSelectionCheck: function (event) {
       var selection = this.getEditor().getSelection();
