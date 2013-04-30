@@ -176,6 +176,7 @@
               var remotePatchedChecksum = crc.crc32(remotePatchedText);
 
               if ((patchChecksum != remotePatchedChecksum)) {
+                console.log("Reverting document because checksum did not match");
                 this._revertDocument(currentContent, localPatch, CKEDITOR.tools.bind(function () {
                   // TODO: Apply local changes...
                   callback();
@@ -195,6 +196,7 @@
               }
               
             } else {
+              console.log("Reverting document because could not apply the patch");
               this._revertDocument(currentContent, localPatch, CKEDITOR.tools.bind(function () {
                 // TODO: Apply local changes...
                 callback();
