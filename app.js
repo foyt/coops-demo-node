@@ -1,15 +1,33 @@
 // http://openclipart.org/detail/169130/mapa-de-redes-by-ainara14-169130
 
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var express = require('express');
 var util = require('util');
 var app = express();
-var server = http.createServer(app);
 var passport = require('passport');
 var auth = require('./auth');
 var views = require('./views');
 var api = require('./api');
 var apiClient = require('./apiclient');
+
+if (process.env.COOPS_DEMO_UNSECURE_PORT) {
+  var unsecureServer = http.createServer(app);
+  unsecureServer.listen(process.env.COOPS_DEMO_UNSECURE_PORT);
+  console.log("Listening unsecure port " + process.env.COOPS_DEMO_UNSECURE_PORT);
+}
+
+if (process.env.COOPS_DEMO_SECURE_PORT && process.env.COOPS_DEMO_SECURE_CERT && process.env.COOPS_DEMO_SECURE_CERT_KEY) {
+  var certificate = { 
+    key: fs.readFileSync(process.env.COOPS_DEMO_SECURE_CERT_KEY).toString(), 
+    cert: fs.readFileSync(process.env.COOPS_DEMO_SECURE_CERT).toString() 
+  };
+
+  secureServer = https.createServer(certificate, app);
+  secureServer.listen(process.env.COOPS_DEMO_SECURE_PORT);
+  console.log("Listening secure port " + process.env.COOPS_DEMO_SECURE_PORT);
+}
 
 app.configure(function () {
   app.use(express.logger());
@@ -100,5 +118,3 @@ app.configure(function () {
   app.patch('/files/:fileid', api.filePatch);
   
 });
-
-server.listen(process.env.PORT_COOPS_DEMO || process.env.PORT ||8080);
