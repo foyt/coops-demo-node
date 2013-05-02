@@ -14,8 +14,8 @@ CKEDITOR.plugins.add('coops-ws', {
         this._selectionCheckPaused = false;
         this._currentColorProfileId = 0;
         this._currentColorProfileCount = 122;
-		this._pendingMessages = new Array();
-		this._socketOpen = false;
+		    this._pendingMessages = new Array();
+		    this._socketOpen = false;
 
         editor.on("CoOPS:SessionStart", this._onSessionStart, this);
       },
@@ -230,30 +230,47 @@ CKEDITOR.plugins.add('coops-ws', {
         },
         
         _sendWebSocketMessage: function (message) {
-		  // TODO: Support for browsers without JSON support
-		  if (this._socketOpen) {
-            this._webSocket.send(JSON.stringify(message));
-		  } else {
-		    this._pendingMessages.push(message);
-		  }
+    		  // TODO: Support for browsers without JSON support
+    		  if (this._socketOpen) {
+                this._webSocket.send(JSON.stringify(message));
+    		  } else {
+    		    this._pendingMessages.push(message);
+    		  }
         },
 
         _onSessionStart : function(event) {
-          var joinData = event.data.joinData;
-
-          this._revisionNumber = event.data.revisionNumber;
-          
           try {
-	        if ((typeof window.WebSocket) == 'function') {
-	          this._webSocket = new WebSocket(joinData.webSocketUrl);
-	        } else if ((typeof window.MozWebSocket) == 'function') {
-	          this._webSocket = new MozWebSocket(joinData.webSocketUrl);
-	        } else {
-	          throw new Error("Browser does not support WebSocket.");
-	        }     
+            var joinData = event.data.joinData;
+  
+            this._revisionNumber = event.data.revisionNumber;
+            var webSocketUrl = null;
+            
+            var secure = window.location.protocol.indexOf('https') == 0;
+            if (secure) {
+              if (joinData.secureWebSocketUrl) {
+                webSocketUrl = joinData.secureWebSocketUrl;
+              } else {
+                throw new Error("CoOPS Server does not support secure websocket connections");
+              }
+            } else {
+              webSocketUrl = joinData.unsecureWebSocketUrl;
+            }
+
+            try {
+    	        if ((typeof window.WebSocket) != 'undefined') {
+    	          this._webSocket = new WebSocket(webSocketUrl);
+    	        } else if ((typeof window.MozWebSocket) != 'undefined') {
+    	          this._webSocket = new MozWebSocket(webSocketUrl);
+    	        } else {
+    	          throw new Error("Browser does not support WebSocket.");
+    	        }     
+            } catch (e) {
+              throw e;
+            }   
           } catch (e) {
-            throw e;
-          }     
+            // TODO: Proper error handling
+            alert("Could not join session: " + e);
+          }
 
           this.getEditor().fire("CoOPS:WebSocketConnect");
 
