@@ -3,13 +3,13 @@
   var settings = require('../settings');
   var _ = require('underscore');
   var client = null;
-  
+
   Client = rest.service(function(baseUrl, clientId, clientSecret) {
     this.baseURL = baseUrl;
     this._clientId = clientId;
     this._clientSecret = clientSecret;
   }, { }, {
-    createUser: function(name, callback) {
+    createUser: function(name) {
       return this.post('/1/users', {
         username: this._clientId,
         password: this._clientSecret,
@@ -50,6 +50,22 @@
         headers: {
           'Authorization': 'Bearer ' + accessToken
         }
+      });
+    },
+    listFileUsers: function (accessToken, userId, fileId) {
+      return this.get('/1/users/' + userId + '/files/' + fileId + '/users', {
+        headers: {
+          'Authorization': 'Bearer ' + accessToken
+        }
+      });
+    },
+    updateFileUsers: function (accessToken, userId, fileId, fileUsers) {
+      return this.post('/1/users/' + userId + '/files/' + fileId + '/users', {
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        data: JSON.stringify(fileUsers)
       });
     }
   });
