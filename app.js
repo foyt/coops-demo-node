@@ -73,11 +73,18 @@ app.configure(function () {
     res.redirect('/');
   });
   
+  // GitHub
   app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] } ));
   app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), function(req, res) {
     res.redirect('/');
   });  
-
+  
+  // Google
+  app.get('/auth/google', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'] } ));
+  app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), function(req, res) {
+    res.redirect('/');
+  });  
+  
   /**
    * Logs user out
    */
@@ -91,6 +98,14 @@ app.configure(function () {
   app.get('/files/:fileid/edit/ckeditor', views.fileEditCKEditor);
   
   app.get('/files/:fileid/view', views.fileView);
+  
+  // File users
+  
+  app.post('/files/:fileid/users', views.updateUsers);
+
+  // Users
+  
+  app.get('/users/search', views.usersSearch);
 
   
   // API

@@ -6,7 +6,44 @@ block header
   a(href="/auth/logout")
     | Logout
 block content
-  img(src="/gfx/ckeditor-logo.png",class="view-image") 
+  // img(src="/gfx/ckeditor-logo.png",class="view-image")
+  img(src="/gfx/users.png",class="collaborators-button") 
+  div(id="collaborators-container",style="display:none")
+    h4
+      |Document users
+    table
+      each user in users
+        tr
+          td
+            |#{user.name||user.email||'Anonymous'}
+          td
+            if (user.role === 'OWNER') 
+              select(data-id="#{user.userId}",disabled="disabled")
+                optgroup(label="Role")
+                  option(value="OWNER")
+                    |Owner
+                  option(value="WRITER")
+                    |Writer
+                  option(value="READER")
+                    |Reader
+                optgroup(label="Remove")
+                  option(value="REMOVE")
+                    |Remove
+            if (user.role !== 'OWNER') 
+              select(data-id="#{user.userId}")
+                optgroup(label="Role")
+                  option(value="WRITER")
+                    |Writer
+                  option(value="READER")
+                    |Reader
+                optgroup(label="Remove")
+                  option(value="REMOVE")
+                    |Remove
+    div(class="collaborators-add-container")
+      h5
+        |Add new collaborators
+      input(id="collaborators-select")
+    input(type="submit",value="Save",name="save")
   h2 
     |#{title}
   p(class="info-text")

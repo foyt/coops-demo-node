@@ -1,11 +1,16 @@
 body {
   font-family: Gadget;
-  font-variant: small-caps;
+  // font-variant: small-caps;
 }
 
-h2 {
+h1, h2, h3, h4, h5, h6 {
   color: #000;
   font-weight: normal;
+  font-variant: small-caps;	
+}
+
+a {
+  font-variant: small-caps;		
 }
 
 .container {
@@ -131,6 +136,11 @@ form input[type="submit"] {
 }
 
 .footer {
+  display: none;
+}
+
+/**
+.footer {
   position: absolute;
   left: 0px;
   right: 0px;
@@ -156,6 +166,71 @@ form input[type="submit"] {
 
 .footer-right {
   float: right;
+}
+**/
+/* Edit View */
+
+.collaborators-button {
+  border: 1px outset #aaa;
+  padding: 4px;
+  background: #fefefe;
+  position: absolute;
+  right: 2px;
+  top: 28px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+#collaborators-container {
+  position: absolute;
+  right: 2px;
+  top: 75px;
+  border: 1px solid #aaa;
+  padding: 4px;
+  background: #fefefe;
+  border-radius: 4px;
+  z-index: 99;
+  width: 400px;
+}
+
+#collaborators-container h4 {
+  margin: 3px; 
+}
+
+#collaborators-container h5 {
+  margin: 0px; 
+}
+
+.collaborators-add-container {
+  margin: 3px;
+}
+
+.collaborators-add-container input {   
+  margin-top: 2px;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;        
+}
+
+#collaborators-container table {
+  border-bottom: 1px solid #eee; 
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+#collaborators-container td:first-child {
+  width: 200px;
+}
+
+#collaborators-container td:last-child {
+  text-align: right;
+  width: 200px;
+}
+
+#collaborators-container input[type="submit"] {
+  margin-left: 2px;
+  margin-top: 4px;
 }
 
 /* Dialogs */

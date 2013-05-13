@@ -41,7 +41,16 @@ block content
       label
         |GitHub Client Secret
       input(name="github-client-secret",type="text",value="#{settings['github-client-secret']||''}")
-      
+    h3
+      |Google
+    div
+      label
+        |Google Client Id
+      input(name="google-client-id",type="text",value="#{settings['google-client-id']||''}")
+    div
+      label
+        |Google Client Secret
+      input(name="google-client-secret",type="text",value="#{settings['google-client-secret']||''}")
     input(type="submit", value="Save")
 block footer
   div(class="footer-left")
