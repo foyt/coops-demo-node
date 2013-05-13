@@ -30,7 +30,7 @@
             } else {
               var firstUserId = userEmails[0].userId;
               userEmails.forEach(function (userEmail) {
-                if (userEmail.userId != firstUserId) {
+                if (!userEmail.userId.equals(firstUserId)) {
                   callback("Several users found with given set of emails", null);
                   return;
                 }
@@ -195,8 +195,8 @@
   			    done(result, null);
   			  } else {
   			    var emails = _.pluck(result, 'email');
-  			    
-  			    loginUser(identifier, emails, profile.name, function (err, user) {
+  			    var name = profile.displayName || profile.username || 'Anonymous';
+  			    loginUser(identifier, emails, name, function (err, user) {
 	              loginCoOps(user, function (err, loggedUser) {
 	                done(err, loggedUser);              
 	              });

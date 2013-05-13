@@ -15,7 +15,7 @@
     "mongoose": "3.6.9",
     "passport": "0.1.16",
     "passport-facebook": "0.1.5",
-    "passport-github": "0.1.4",
+    "passport-github": "0.1.5",
     "passport-google-oauth": "0.1.5",
     "jade": "*",
     "restler": "2.0.1",
