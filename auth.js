@@ -3,6 +3,7 @@
   var passport = require('passport');
   var FacebookStrategy = require('passport-facebook').Strategy;
   var GitHubStrategy = require('passport-github').Strategy;
+  var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
   var passport = require('passport');
   var database = require('./database.js');
   var apiClient = require('./apiclient');
@@ -64,7 +65,7 @@
     var result = new Array();
     database.model.UserEmail.find({ 'email': { $in: emails } }, function (err, userEmails) {
       var existingEmails = _.pluck(userEmails, 'email');
-      var missingEmails = existingEmails;
+      var missingEmails = emails;
       existingEmails.forEach(function (existingEmail) {
         missingEmails = _.without(emails, existingEmail);
       });
@@ -112,7 +113,7 @@
           if (response.statusCode >= 200 && response.statusCode <= 299) {
             var resp = data['response'];
             if (!resp) {
-              callback("Invalid response from CoOPS server.");
+              callback("Invalid response from CoOPS server.", null);
             } else {
 	          var tokenResponse = resp['access_token'];
 	          
@@ -122,16 +123,16 @@
 	          user.tokenExpires = new Date().getTime() + tokenResponse['expires_in'];
 	          
 	          user.save(function (err, user) {
-	            callback(err);
+	            callback(err, user);
 	          });
             }
           } else {
-            callback("Could not connect to Co-Ops Server.");
+            callback("Could not connect to Co-Ops Server.", null);
           }
         });
       });
     } else {
-      callback(null);
+      callback(null, user);
     }
   }
   
@@ -160,8 +161,8 @@
 	        var emails = _.pluck(profile.emails, 'value');
 	
 	        loginUser(identifier, emails, profile.name, function (err, user) {
-	          loginCoOps(user, function (err) {
-	            done(err, user);              
+	          loginCoOps(user, function (err, loggedUser) {
+	            done(err, loggedUser);              
 	          });
 	        });
 	      });
@@ -194,9 +195,10 @@
   			    done(result, null);
   			  } else {
   			    var emails = _.pluck(result, 'email');
+  			    
   			    loginUser(identifier, emails, profile.name, function (err, user) {
-	              loginCoOps(user, function (err) {
-	                done(err, user);              
+	              loginCoOps(user, function (err, loggedUser) {
+	                done(err, loggedUser);              
 	              });
 	            });
   			  }
@@ -204,6 +206,40 @@
           });
         }
       ));
+    }
+  });
+  
+  settings.get(['google-client-id', 'google-client-secret'], function (err, settings) {
+    var settingMap = _.object(_.pluck(settings, 'key'), _.pluck(settings, 'value'));
+  
+    if (settingMap['google-client-id'] && settingMap['google-client-secret']) {
+  	  passport.use(new GoogleStrategy({
+  	    clientID: settingMap['google-client-id'],
+  	    clientSecret: settingMap['google-client-secret'],
+  	    callbackURL: "/auth/google/callback"
+  	  },
+	    function(accessToken, refreshToken, profile, done) {
+	      process.nextTick(function(){
+	        var identifier = 'google-' + profile.id;
+	        var emails = _.pluck(profile.emails, 'value');
+	
+			var name = profile.name.givenName;
+  			if (name && profile.name.familyName) {
+  			  name += ' ' + profile.name.familyName;
+  			}
+  			    
+  			if (!name) {
+  			  name = 'Anonymous';
+  			}
+  			    
+	        loginUser(identifier, emails, name, function (err, user) {
+	          loginCoOps(user, function (err, loggedUser) {
+	            done(err, loggedUser);              
+	          });
+	        });
+	      });
+	    }
+	    ));
     }
   });
   
