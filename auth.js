@@ -159,8 +159,8 @@
 	      process.nextTick(function(){
 	        var identifier = 'facebook-' + profile.id;
 	        var emails = _.pluck(profile.emails, 'value');
-	
-	        loginUser(identifier, emails, profile.name, function (err, user) {
+	        var name = profile.displayName || profile.username || 'Anonymous';
+	        loginUser(identifier, emails, name, function (err, user) {
 	          loginCoOps(user, function (err, loggedUser) {
 	            done(err, loggedUser);              
 	          });
