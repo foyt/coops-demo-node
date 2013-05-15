@@ -1,13 +1,15 @@
 extend layout
 block header
-  a(href="/auth/logout")
-    | Logout
+  div(class="login-info")
+    |Logged in as #{loggedUser.name} 
+    a(href="/auth/logout")
+      |Logout
 block content
   img(src="/gfx/files.png",class="view-image") 
   h2 
-    | Files
+    |Files
   p(class="info-text")
-    | Your files
+    |Your files
   div(class="view-tools")
     a(class="view-tool",href="javascript:void(null)",onclick="openNewFileDialog(event)",data-type="ckeditor")
       img(src="/gfx/ckeditor-icon.png")

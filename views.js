@@ -21,7 +21,11 @@
 		      } else {
 		        if (response.statusCode >= 200 && response.statusCode <= 299) {
 		          var resp = data['response'];
-		          res.render('files', { title : 'Files', files: resp.files })
+		          res.render('files', { 
+		            title : 'Files', 
+		            files: resp.files,
+		            loggedUser: req.user
+		          });
 		        } else {
 		          res.send("Error occured while listing user files from Co-Ops server.", 500);
 		        }
@@ -73,47 +77,58 @@
       res.redirect('/');
     } else {
       apiClient.get(function (client) {
-        client.listFileUsers(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(data, response) {
-          if (!response) {
+        // List file users from server
+        client.listFileUsers(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(userListData, userListResponse) {
+          if (!userListResponse) {
               res.send("Could not connect to Co-Ops server.", 500);
           } else {
-            if (response.statusCode >= 200 && response.statusCode <= 299) {
-              var fileUsers = data['response'];
-              var userIds = _.uniq(_.pluck(fileUsers, "userId"));
+            if (userListResponse.statusCode >= 200 && userListResponse.statusCode <= 299) {
+              var serverFileUsers = userListData['response'];
+              var serverUserIds = _.uniq(_.pluck(serverFileUsers, "userId"));
               
-              database.model.User.find({ 'userId': { $in: userIds } }, function (err1, users) {
+			  // find local matches for users
+              database.model.User.find({ 'userId': { $in: serverUserIds } }, function (err1, users) {
                 if (err1) {
                   res.send(err1, 500);
                 } else {
-                  var userMap = _.object(_.pluck(users, 'userId'), _.pluck(users, '_id'));
-                
-				  database.model.UserEmail.find({ 'userId': { $in: _.uniq(_.pluck(users, "_id")) } }, function (err2, userEmails) {
-				    if (err2) {
-                      res.send(err2, 500);
+                  var localUserIds = _.pluck(users, '_id');
+                  var userMap = new Object();
+                  users.forEach(function (user) {
+                    userMap[user.userId] = user;
+                  });
+                  
+                  database.model.UserEmail.find({ 'userId': { $in: localUserIds } }, function (err2, userEmails) {
+    	            if (err2) {
+    				  res.send(err2, 500);
                     } else {
-				      var emailMap = _.object(_.pluck(userEmails, 'userId'), _.pluck(userEmails, 'email'));
-	              
+                      var emailMap = _.object(_.pluck(userEmails, 'userId'), _.pluck(userEmails, 'email'));
+                  
+	                  // Add users to users array
 	                  var users = new Array();
-	                  fileUsers.forEach(function (fileUser) {
-	                    var name = '';
-	                    var email = emailMap[userMap[fileUser.userId]];
 	                  
+	                  serverFileUsers.forEach(function (serverFileUser) {
+	                    var localUser = userMap[serverFileUser.userId];
+	                    var name = localUser.name;
+                        var email = emailMap[localUser._id];
+                        var text = name ? name + (email ? ' <' + email + '>' : '') : email;
+
 	                    users.push({
-	                      userId: fileUser.userId,
-	                      role: fileUser.role,
-	                      name: name,
-	                      email: email
-      	                });
-  	                  });
-	                 
-	                  res.render('edit_ckeditor', {
-	                    title : 'Dokumentti - otsake',
-	                    users: users
+		                  userId: serverFileUser.userId,
+		                  role: serverFileUser.role,
+		                  name: text || 'Anonymous'
+	      	            });
 	                  });
-	                }
-	              });
-	            }
+	                  
+	                  res.render('edit_ckeditor', {
+		                title : 'Dokumentti - otsake',
+		                users: users,
+		           	    loggedUser: req.user
+		              });
+		            }
+		          });
+                }
               });
+              
             } else {
               res.send("Error occured while listing user files from Co-Ops server.", 500);
             }
@@ -128,29 +143,36 @@
 
   module.exports.usersSearch = function (req, res) {
     if (req.user) {
-    	var emailQuery = req.query.email;  
-    	if (emailQuery) {
-    	  // Turn search text into lower case and escape special characters 
-    	  var searchEmail = emailQuery.toLowerCase().replace(/([^a-z@])/g, "\\$1");
-    	  var emailRegExp = new RegExp(['.*', searchEmail, '.*'].join(''));
-    	  database.model.UserEmail.find({email: emailRegExp }, function (err, results) {
-    		if (err) {
-    		  res.send(err, 500);
-    		} else {
-    		  var result = new Array();
-    		  results.forEach(function (i) {
-    		    if (i.userId != req.user.id) {
-      		    result.push({
-      		      label: i.email,
-      		      value: i.userId
-      		    });
-    		    }
-    		  });
+      var emailQuery = req.query.email;  
+      if (emailQuery) {
+        // Turn search text into lower case and escape special characters 
+    	var searchEmail = emailQuery.toLowerCase().replace(/([^a-z@])/g, "\\$1");
+    	var emailRegExp = new RegExp(['.*', searchEmail, '.*'].join(''));
+    	database.model.UserEmail.find({email: emailRegExp }, function (err1, results) {
+    	  if (err1) {
+    		res.send(err1, 500);
+          } else {
+            var localUserIds = _.without(_.pluck(results, 'userId'), req.user.id);
+            var emailMap = _.object(_.pluck(results, 'userId'), _.pluck(results, 'email'));
+          
+            database.model.User.find( { _id: { $in:  localUserIds } }, function (err2, users) {
+      	      if (err2) {
+    		    res.send(err2, 500);
+    		  } else {
+				var result = new Array();
+    			users.forEach(function (user) {
+  				  result.push({
+      		        label: emailMap[user._id],
+      		        value: user.userId
+        		  });
+    	        });
     		  
-    		  res.send(JSON.stringify(result));
-    		}    
-    	  });
-    	} else {
+                res.send(JSON.stringify(result));    		  
+    		  }
+            });
+    	  }    
+    	});
+      } else {
         res.send("[]", 200);
       }
     } else {

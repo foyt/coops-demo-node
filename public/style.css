@@ -135,6 +135,10 @@ form input[type="submit"] {
   font-size: 14px;
 }
 
+.login-info {
+  float: right;
+}
+
 .footer {
   display: none;
 }
@@ -190,7 +194,7 @@ form input[type="submit"] {
   background: #fefefe;
   border-radius: 4px;
   z-index: 99;
-  width: 400px;
+  width: 440px;
 }
 
 #collaborators-container h4 {
@@ -219,13 +223,23 @@ form input[type="submit"] {
   padding-bottom: 8px;
 }
 
+#collaborators-container td {
+  white-space: nowrap;
+}
+
 #collaborators-container td:first-child {
-  width: 200px;
+  width: 220px;
+  max-width: 220px;
 }
 
 #collaborators-container td:last-child {
   text-align: right;
-  width: 200px;
+  width: 220px;
+  max-width: 220px;
+}
+
+#collaborators-container td:last-child select {
+  min-width:  90px;  
 }
 
 #collaborators-container input[type="submit"] {

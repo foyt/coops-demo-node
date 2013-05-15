@@ -3,8 +3,10 @@ block head
   script(type="text/javascript",src="/ckeditor/ckeditor.js")
   script(type="text/javascript",src="/ckeditor-init.js")
 block header
-  a(href="/auth/logout")
-    | Logout
+  div(class="login-info")
+    |Logged in as #{loggedUser.name} 
+    a(href="/auth/logout")
+      |Logout
 block content
   // img(src="/gfx/ckeditor-logo.png",class="view-image")
   img(src="/gfx/users.png",class="collaborators-button") 
@@ -19,23 +21,23 @@ block content
           td
             if (user.role === 'OWNER') 
               select(data-id="#{user.userId}",disabled="disabled")
-                optgroup(label="Role")
-                  option(value="OWNER")
-                    |Owner
-                  option(value="WRITER")
-                    |Writer
-                  option(value="READER")
-                    |Reader
-                optgroup(label="Remove")
-                  option(value="REMOVE")
-                    |Remove
-            if (user.role !== 'OWNER') 
+                option(value="OWNER",SELECTED="selected")
+                  |Owner
+            else
               select(data-id="#{user.userId}")
                 optgroup(label="Role")
-                  option(value="WRITER")
-                    |Writer
-                  option(value="READER")
-                    |Reader
+                  if (user.role === 'WRITER') 
+                    option(value="WRITER",SELECTED="selected")
+                      |Writer
+                  else
+                    option(value="WRITER")
+                      |Writer
+                  if (user.role === 'READER') 
+                    option(value="READER",SELECTED="selected")
+                      |Reader
+                  else
+                    option(value="READER")
+                      |Reader
                 optgroup(label="Remove")
                   option(value="REMOVE")
                     |Remove
