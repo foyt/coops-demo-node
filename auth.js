@@ -132,6 +132,7 @@
         });
       });
     } else {
+      // TODO: Refresh token
       callback(null, user);
     }
   }
