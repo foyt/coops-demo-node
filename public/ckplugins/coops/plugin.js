@@ -208,13 +208,13 @@ CKEDITOR.coops.CoOps = CKEDITOR.tools.createClass({
     _joinFile: function (algorithms, protocolVersion) {
       var _this = this;
       this._restClient.fileJoin(algorithms, protocolVersion, function (status, responseJson, error) {
-        _this._loadFile(responseJson.response);
+        _this._loadFile(responseJson);
       });
     },
     _loadFile: function (joinData) {
       var _this = this;
       this._restClient.fileGet(function (status, responseJson, error) {
-        _this._startSession(joinData, responseJson.response.content, responseJson.response.revisionNumber);
+        _this._startSession(joinData, responseJson.content, responseJson.revisionNumber);
       });
     },
     _startSession: function(joinData, content, revisionNumber) {

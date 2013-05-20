@@ -111,20 +111,19 @@
       apiClient.get(function (client) {
         client.createUser(user.name).on('complete', function(data, response) {
           if (response.statusCode >= 200 && response.statusCode <= 299) {
-            var resp = data['response'];
-            if (!resp) {
+            if (!data) {
               callback("Invalid response from CoOPS server.", null);
             } else {
-	          var tokenResponse = resp['access_token'];
+	            var tokenResponse = data['access_token'];
+
+	            user.userId = data['user_id'];
+	            user.accessToken = tokenResponse['access_token'];
+	            user.refreshToken = tokenResponse['refresh_token'];
+	            user.tokenExpires = new Date().getTime() + tokenResponse['expires_in'];
 	          
-	          user.userId = resp['user_id'];
-	          user.accessToken = tokenResponse['access_token'];
-	          user.refreshToken = tokenResponse['refresh_token'];
-	          user.tokenExpires = new Date().getTime() + tokenResponse['expires_in'];
-	          
-	          user.save(function (err, user) {
-	            callback(err, user);
-	          });
+	            user.save(function (err, user) {
+	              callback(err, user);
+	            });
             }
           } else {
             callback("Could not connect to Co-Ops Server.", null);

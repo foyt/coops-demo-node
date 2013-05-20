@@ -96,8 +96,8 @@
                 // TODO: Proper error handling
                 alert("Failed to revert back");
               } else {
-                var revertedContent = responseJson.response.content;
-                var revisionNumber = responseJson.response.revisionNumber;
+                var revertedContent = responseJson.content;
+                var revisionNumber = responseJson.revisionNumber;
                 
                 if (localPatch) {
                   var localPatchResult = _this._diffMatchPatch.patch_apply(localPatch, revertedContent);

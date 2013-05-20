@@ -20,10 +20,9 @@
   		        res.send("Could not connect to Co-Ops server.", 500);
 		      } else {
 		        if (response.statusCode >= 200 && response.statusCode <= 299) {
-		          var resp = data['response'];
 		          res.render('files', { 
 		            title : 'Files', 
-		            files: resp.files,
+		            files: data.files,
 		            loggedUser: req.user
 		          });
 		        } else {
@@ -83,7 +82,7 @@
               res.send("Could not connect to Co-Ops server.", 500);
           } else {
             if (userListResponse.statusCode >= 200 && userListResponse.statusCode <= 299) {
-              var serverFileUsers = userListData['response'];
+              var serverFileUsers = userListData;
               var serverUserIds = _.uniq(_.pluck(serverFileUsers, "userId"));
               
 			  // find local matches for users
