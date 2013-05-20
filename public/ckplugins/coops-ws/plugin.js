@@ -8,6 +8,7 @@ CKEDITOR.plugins.add('coops-ws', {
         this.base(editor);
 
         this._revisionNumber = null;
+        this._clientId = null;
         this._selectionStyles = {};
         this._clientColorProfiles = {};
         this._selections = {};
@@ -26,12 +27,22 @@ CKEDITOR.plugins.add('coops-ws', {
           var clientId = message.clientId;
           var checksum = message.checksum;
 
-          if (editor.fire("CoOPS:PatchReceived", {
-            patch : patch,
-            checksum: checksum
-          })) {
-            this._revisionNumber = revisionNumber;
-          };
+          if (this._clientId != clientId) {
+            // Received a patch from other client
+            if (editor.fire("CoOPS:PatchReceived", {
+              patch : patch,
+              checksum: checksum
+            })) {
+              this._revisionNumber = revisionNumber;
+            };
+          } else {
+            // Our patch was accepted, yay!
+            this._revisionNumber = message.revisionNumber;
+            this.getEditor().getChangeObserver().resume();
+            this.getEditor().fire("CoOPS:PatchAccepted", {
+              revisionNumber: this._revisionNumber
+            });
+          }
         },
 
         _cleanSelectionMarkers : function(clientId) {
@@ -232,7 +243,7 @@ CKEDITOR.plugins.add('coops-ws', {
         _sendWebSocketMessage: function (message) {
     		  // TODO: Support for browsers without JSON support
     		  if (this._socketOpen) {
-                this._webSocket.send(JSON.stringify(message));
+            this._webSocket.send(JSON.stringify(message));
     		  } else {
     		    this._pendingMessages.push(message);
     		  }
@@ -243,6 +254,8 @@ CKEDITOR.plugins.add('coops-ws', {
             var joinData = event.data.joinData;
   
             this._revisionNumber = event.data.revisionNumber;
+            this._clientId = joinData.clientId;
+            
             var webSocketUrl = null;
             
             var secure = window.location.protocol.indexOf('https') == 0;
@@ -348,13 +361,6 @@ CKEDITOR.plugins.add('coops-ws', {
             case 'patchRejected':
               this.getEditor().getChangeObserver().resume();
               this.getEditor().fire("CoOPS:PatchRejected");
-            break;
-            case 'patchAccepted':
-              this._revisionNumber = message.revisionNumber;
-              this.getEditor().getChangeObserver().resume();
-              this.getEditor().fire("CoOPS:PatchAccepted", {
-                revisionNumber: this._revisionNumber
-              });
             break;
           }
         },
