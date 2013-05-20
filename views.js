@@ -138,7 +138,16 @@
     }
   };
   
-  module.exports.fileView = function (req, res) {
+  module.exports.fileViewCKEditor = function (req, res) {
+    if (!req.user) {
+      res.redirect('/');
+    } else {
+      res.render('view_ckeditor', {
+        title : 'Dokumentti - otsake',
+        readOnly: true,
+        loggedUser: req.user
+      });
+    }
   };
 
   module.exports.usersSearch = function (req, res) {
@@ -184,7 +193,7 @@
     if (req.user) {
       apiClient.get(function (client) {
         client.updateFileUsers(req.user.accessToken, req.user.userId, req.params.fileid, req.body).on('complete', function(data, response) {
-          res.send(200);
+          res.send("[]", 200);
         });
       });
     } else {

@@ -1,0 +1,16 @@
+extend layout
+block head
+  script(type="text/javascript",src="/ckeditor/ckeditor.js")
+  script(type="text/javascript",src="/view-ckeditor.js")
+block header
+  div(class="login-info")
+    |Logged in as #{loggedUser.name} 
+    a(href="/auth/logout")
+      |Logout
+block content
+  h2 
+    |#{title}
+  p(class="info-text")
+    |You don't have permission to edit this file so the editor is in readonly mode.
+  div(class="editor")
+    div(id="ckcontainer")

@@ -97,7 +97,7 @@ app.configure(function () {
   
   app.get('/files/:fileid/edit/ckeditor', views.fileEditCKEditor);
   
-  app.get('/files/:fileid/view', views.fileView);
+  app.get('/files/:fileid/view/ckeditor', views.fileViewCKEditor);
   
   // File users
   
