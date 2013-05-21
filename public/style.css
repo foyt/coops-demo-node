@@ -6,21 +6,18 @@ body {
 h1, h2, h3, h4, h5, h6 {
   color: #000;
   font-weight: normal;
-  font-variant: small-caps;	
+  font-variant: small-caps; 
 }
 
 a {
-  font-variant: small-caps;		
+  font-variant: small-caps;   
 }
 
 .container {
   border-top: 1px solid #fff;
   border-bottom: 1px solid #fff;
-  position: absolute;
-  top: 22px;
-  bottom: 22px;
-  left: 0px;
-  right: 0px;
+  margin-top: 20px;
+  min-height: 800px;
   background: rgb(255, 255, 255); /* Old browsers */
   background: -moz-linear-gradient(top, rgba(255, 255, 255, 1) 0%, rgba(241, 241, 241, 1) 23%, rgba(225, 225, 225, 1) 79%, rgba(246, 246, 246, 1) 100%); /* FF3.6+ */
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255, 255, 255, 1)), color-stop(23%, rgba(241, 241, 241, 1)), color-stop(79%, rgba(225, 225, 225, 1)), color-stop(100%, rgba(246, 246, 246, 1))); /* Chrome,Safari4+ */
@@ -197,7 +194,7 @@ form input[type="submit"] {
 }
 
 #collaborators-dialog #collaborators-select {
-	width: 100%;
+  width: 100%;
 }
 
 #collaborators-dialog td {
@@ -214,7 +211,7 @@ form input[type="submit"] {
 }
 
 #collaborators-dialog td:last-child select {
-	width: 120px;
+  width: 120px;
 }
 
 /* Dialogs */
@@ -254,4 +251,12 @@ form input[type="submit"] {
 .dialog-buttons input[type="submit"] {
   margin-left: 4px;
   border: 1px solid #000;
+}
+
+.ck-viewer {
+  padding: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #fff;
+  border: 1px solid #aaa;
 }

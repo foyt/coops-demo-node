@@ -14,6 +14,7 @@ $(document).ready(function() {
     skin: 'moono',
     extraPlugins: 'coops-ws,coops-dmp,coops,mrmonkey',
     readOnly: true,
+    height: 500,
     coops: {
       serverUrl: serverUrl,
       websocket: {

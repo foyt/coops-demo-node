@@ -123,8 +123,7 @@
   	                      res.render('edit_ckeditor', {
       		                  title : fileData.name,
       		                  users: users,
-      		           	      loggedUser: req.user,
-      		           	      content: fileData.content
+      		           	      loggedUser: req.user
       		                });
 	                      } else {
 	                        res.send("Error occured while retriving file from Co-Ops server.", 500);
@@ -148,11 +147,13 @@
     if (!req.user) {
       res.redirect('/');
     } else {
-      client.getFile(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(fileData, fileResponse) {
-        res.render('view_ckeditor', {
-          title : fileData.name,
-          readOnly: true,
-          loggedUser: req.user
+      apiClient.get(function (client) {
+        client.getFile(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(fileData, fileResponse) {
+          res.render('view_ckeditor', {
+            title : fileData.name,
+            loggedUser: req.user,
+            content: fileData.content
+          });
         });
       });
     }
