@@ -204,20 +204,15 @@ CKEDITOR.coops.CoOps = CKEDITOR.tools.createClass({
     setSavedContent: function (savedContent) {
       this._savedContent = savedContent;
     },
-  
     _joinFile: function (algorithms, protocolVersion) {
       var _this = this;
       this._restClient.fileJoin(algorithms, protocolVersion, function (status, responseJson, error) {
-        _this._loadFile(responseJson);
+        _this._startSession(responseJson);
       });
     },
-    _loadFile: function (joinData) {
-      var _this = this;
-      this._restClient.fileGet(function (status, responseJson, error) {
-        _this._startSession(joinData, responseJson.content, responseJson.revisionNumber);
-      });
-    },
-    _startSession: function(joinData, content, revisionNumber) {
+    _startSession: function(joinData) {
+      var content = joinData.content;
+      
       this.getEditor().getChangeObserver().pause();
       try {
         this.getEditor().getSelection().removeAllRanges();
@@ -237,10 +232,10 @@ CKEDITOR.coops.CoOps = CKEDITOR.tools.createClass({
       }
       
       this.getEditor().fire("CoOPS:SessionStart", {
-        joinData: joinData,
-        content: content, 
-        revisionNumber: revisionNumber
+        joinData: joinData
       });
+      
+      this.getEditor().setReadOnly(false);
       
       // this.getEditor().on('selectionCheck', this._onSelectionCheck, this);
     },

@@ -253,7 +253,7 @@ CKEDITOR.plugins.add('coops-ws', {
           try {
             var joinData = event.data.joinData;
   
-            this._revisionNumber = event.data.revisionNumber;
+            this._revisionNumber = joinData.revisionNumber;
             this._clientId = joinData.clientId;
             
             var webSocketUrl = null;

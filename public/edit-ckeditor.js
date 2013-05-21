@@ -13,6 +13,7 @@ $(document).ready(function() {
   var editor = CKEDITOR.appendTo( 'ckcontainer', { 
     skin: 'moono',
     extraPlugins: 'coops-ws,coops-dmp,coops,mrmonkey',
+    readOnly: true,
     coops: {
       serverUrl: serverUrl,
       websocket: {

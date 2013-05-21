@@ -79,13 +79,13 @@
         // List file users from server
         client.listFileUsers(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(userListData, userListResponse) {
           if (!userListResponse) {
-              res.send("Could not connect to Co-Ops server.", 500);
+            res.send("Could not connect to Co-Ops server.", 500);
           } else {
             if (userListResponse.statusCode >= 200 && userListResponse.statusCode <= 299) {
               var serverFileUsers = userListData;
               var serverUserIds = _.uniq(_.pluck(serverFileUsers, "userId"));
               
-			  // find local matches for users
+			        // find local matches for users
               database.model.User.find({ 'userId': { $in: serverUserIds } }, function (err1, users) {
                 if (err1) {
                   res.send(err1, 500);
@@ -97,34 +97,41 @@
                   });
                   
                   database.model.UserEmail.find({ 'userId': { $in: localUserIds } }, function (err2, userEmails) {
-    	            if (err2) {
-    				  res.send(err2, 500);
+    	              if (err2) {
+    				          res.send(err2, 500);
                     } else {
                       var emailMap = _.object(_.pluck(userEmails, 'userId'), _.pluck(userEmails, 'email'));
                   
-	                  // Add users to users array
-	                  var users = new Array();
+	                    // Add users to users array
+	                    var users = new Array();
 	                  
-	                  serverFileUsers.forEach(function (serverFileUser) {
-	                    var localUser = userMap[serverFileUser.userId];
-	                    var name = localUser.name;
+	                    serverFileUsers.forEach(function (serverFileUser) {
+	                      var localUser = userMap[serverFileUser.userId];
+	                      var name = localUser.name;
                         var email = emailMap[localUser._id];
                         var text = name ? name + (email ? ' <' + email + '>' : '') : email;
 
-	                    users.push({
-		                  userId: serverFileUser.userId,
-		                  role: serverFileUser.role,
-		                  name: text || 'Anonymous'
-	      	            });
-	                  });
+	                      users.push({
+		                      userId: serverFileUser.userId,
+		                      role: serverFileUser.role,
+		                      name: text || 'Anonymous'
+	      	              });
+	                    });
 	                  
-	                  res.render('edit_ckeditor', {
-		                title : 'Dokumentti - otsake',
-		                users: users,
-		           	    loggedUser: req.user
-		              });
-		            }
-		          });
+	                    client.getFile(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(fileData, fileResponse) {
+	                      if (userListResponse.statusCode >= 200 && userListResponse.statusCode <= 299) {
+  	                      res.render('edit_ckeditor', {
+      		                  title : fileData.name,
+      		                  users: users,
+      		           	      loggedUser: req.user,
+      		           	      content: fileData.content
+      		                });
+	                      } else {
+	                        res.send("Error occured while retriving file from Co-Ops server.", 500);
+	                      }
+	                    });
+  		              }
+                  });
                 }
               });
               
@@ -141,10 +148,12 @@
     if (!req.user) {
       res.redirect('/');
     } else {
-      res.render('view_ckeditor', {
-        title : 'Dokumentti - otsake',
-        readOnly: true,
-        loggedUser: req.user
+      client.getFile(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(fileData, fileResponse) {
+        res.render('view_ckeditor', {
+          title : fileData.name,
+          readOnly: true,
+          loggedUser: req.user
+        });
       });
     }
   };
