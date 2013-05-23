@@ -37,7 +37,22 @@
   };
   
   module.exports.newFileDialog = function (req, res) {
-    res.render('newfiledialog', { title: 'Create New Document (CKEditor)', type: req.query.type });
+    var contentType = req.query.contentType.split(';');
+    var mimeType = contentType[0];
+    var parametersArray = (contentType[1]||'').split('=');
+    var parameters = new Object();
+    for (var i = 0, l = parametersArray.length; i < l; i += 2) {
+      parameters[parametersArray[i]] = ((i + 1) < l) ? parametersArray[i + 1] : '';
+    }
+    
+    var title = mimeType == 'text/html' ? 'Create New Document' : 'Create New File';
+    
+    var editor = parameters['editor'];
+    if (editor) {
+      title += ' (' + editor + ')';
+    }
+    
+    res.render('newfiledialog', { title: title });
   };
   
   module.exports.setup = function (req, res) {

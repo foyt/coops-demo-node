@@ -1,4 +1,6 @@
 extend layout
+block head
+  script(type='text/javascript',src='/files.js')
 block header
   div(class="login-info")
     |Logged in as #{loggedUser.name} 
@@ -11,7 +13,7 @@ block content
   p(class="info-text")
     |Your files
   div(class="view-tools")
-    a(class="view-tool",href="javascript:void(null)",onclick="openNewFileDialog(event)",data-type="ckeditor")
+    a(class="view-tool",href="javascript:void(null)",onclick="openNewFileDialog(event)",data-type="text/html;editor=CKEditor")
       img(src="/gfx/ckeditor-icon.png")
       |New Document (CKEditor)
   div(class="list")

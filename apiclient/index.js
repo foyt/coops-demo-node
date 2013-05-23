@@ -25,14 +25,15 @@
         }
       });
     },
-    createFile: function (accessToken, userId, name, type) {
+    createFile: function (accessToken, userId, name, content, contentType) {
       return this.post('/1/users/' + userId + '/files', {
         headers: {
           'Authorization': 'Bearer ' + accessToken
         },
         data: {
           name: name,
-          type: type
+          content: content,
+          contentType: contentType
         }
       });
     },

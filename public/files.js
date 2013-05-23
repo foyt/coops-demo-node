@@ -1,6 +1,6 @@
 function openNewFileDialog(event) {
   var target = event.target;
-  var type = $(target).data('type');
+  var contentType = $(target).data('type');
   var dialogId = $(target).data('dialog-id');
   
   function closeDialog() {
@@ -10,7 +10,7 @@ function openNewFileDialog(event) {
   
   if (!dialogId) {
     $.ajax({
-      url: "/newfiledialog?type=" + type,
+      url: "/newfiledialog?contentType=" + contentType,
     }).done(function ( data ) {
       var content = $(data).css({opacity: 0}).appendTo($(document.body));
       var targetOffset = $(target).offset();
@@ -42,11 +42,19 @@ function openNewFileDialog(event) {
       });
       
       $(content).find('input[name="create"]').click(function (event) {
+        var name = $(content).find('input[name="name"]').val();
         $.ajax({
           method: 'post',
-          url: "/files?type=" + type + '&name=' + $(content).find('input[type="text"]').val()
+          url: '/files',
+          data: {
+            name: name,
+            content: '',
+            contentType: contentType
+          }
         }).done(function ( data ) {
           window.location.reload();
+        }).error(function (jqXHR, textStatus, errorThrown) {
+          alert(jqXHR.responseText || errorThrown);
         });
       });
     });
