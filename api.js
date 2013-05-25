@@ -9,11 +9,11 @@
       var protocolVersion = req.query['protocolVersion'];
       
       apiClient.get(function (client) {
-        client.joinFile(req.user.accessToken, req.user.userId, fileId, algorithm, protocolVersion).on('complete', function(data, response) {
-          if (response) {
-            res.send(data, response.statusCode);
+        client.joinFile(req.user, req.user.userId, fileId, algorithm, protocolVersion, function(err, data) {
+          if (err) {
+            res.send(err, 500);
           } else {
-            res.send("Could not connect to Co-Ops server.", 500);
+            res.send(data, 200);
           }
         });    
       });
@@ -27,11 +27,11 @@
       var fileId = req.params.fileid;
       
       apiClient.get(function (client) {
-        client.getFile(req.user.accessToken, req.user.userId, fileId).on('complete', function(data, response) {
-          if (response) {
-            res.send(data, response.statusCode);
+        client.getFile(req.user, req.user.userId, fileId, function(err, data) {
+          if (err) {
+            res.send(err, 500);
           } else {
-            res.send("Error occured while listing user files from Co-Ops server.", 500);
+            res.send(data, 200);
           }
         });
       }); 
@@ -55,11 +55,11 @@
       var contentType = req.body['contentType'];
       
       apiClient.get(function (client) {
-        client.createFile(req.user.accessToken, req.user.userId, name, content, contentType).on('complete', function(data, response) {
-          if (response) {
-            res.send(data, response.statusCode);
+        client.createFile(req.user, req.user.userId, name, content, contentType, function(err, data) {
+          if (err) {
+            res.send(err, 500);
           } else {
-            res.send("Error occured while listing user files from Co-Ops server.", 500);
+            res.send(data, 200);
           }
         });      
       });

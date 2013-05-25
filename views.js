@@ -12,25 +12,21 @@
         res.redirect('/setup');
       } else {
         if (!req.user) {
-		  res.render('login', { title : 'Login' })
-		} else {
-		  apiClient.get(function (client) {
-		    client.listFiles(req.user.accessToken, req.user.userId).on('complete', function(data, response) {
-		      if (!response) {
-  		        res.send("Could not connect to Co-Ops server.", 500);
-		      } else {
-		        if (response.statusCode >= 200 && response.statusCode <= 299) {
-		          res.render('files', { 
-		            title : 'Files', 
-		            files: data.files,
-		            loggedUser: req.user
-		          });
-		        } else {
-		          res.send("Error occured while listing user files from Co-Ops server.", 500);
-		        }
-		      }
-		    });		  
-		  });
+		      res.render('login', { title : 'Login' })
+		    } else {
+		      apiClient.get(function (client) {
+		        client.listFiles(req.user, req.user.userId, function(err, data) {
+		          if (err) {
+  		          res.send(err, 500);
+		          } else {
+		            res.render('files', { 
+		              title : 'Files', 
+		              files: data.files,
+		              loggedUser: req.user
+		            });
+		          }
+		        });		  
+		      });
         }
       }
     });
@@ -92,66 +88,61 @@
     } else {
       apiClient.get(function (client) {
         // List file users from server
-        client.listFileUsers(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(userListData, userListResponse) {
-          if (!userListResponse) {
-            res.send("Could not connect to Co-Ops server.", 500);
+        client.listFileUsers(req.user, req.user.userId, req.params.fileid, function(err1, userListData) {
+          if (err1) {
+            res.send(err1, 500);
           } else {
-            if (userListResponse.statusCode >= 200 && userListResponse.statusCode <= 299) {
-              var serverFileUsers = userListData;
-              var serverUserIds = _.uniq(_.pluck(serverFileUsers, "userId"));
-              
-			        // find local matches for users
-              database.model.User.find({ 'userId': { $in: serverUserIds } }, function (err1, users) {
-                if (err1) {
-                  res.send(err1, 500);
-                } else {
-                  var localUserIds = _.pluck(users, '_id');
-                  var userMap = new Object();
-                  users.forEach(function (user) {
-                    userMap[user.userId] = user;
-                  });
+            var serverFileUsers = userListData;
+            var serverUserIds = _.uniq(_.pluck(serverFileUsers, "userId"));
+            
+		        // find local matches for users
+            database.model.User.find({ 'userId': { $in: serverUserIds } }, function (err2, users) {
+              if (err2) {
+                res.send(err2, 500);
+              } else {
+                var localUserIds = _.pluck(users, '_id');
+                var userMap = new Object();
+                users.forEach(function (user) {
+                  userMap[user.userId] = user;
+                });
+                
+                database.model.UserEmail.find({ 'userId': { $in: localUserIds } }, function (err3, userEmails) {
+  	              if (err3) {
+  				          res.send(err3, 500);
+                  } else {
+                    var emailMap = _.object(_.pluck(userEmails, 'userId'), _.pluck(userEmails, 'email'));
+                
+                    // Add users to users array
+                    var users = new Array();
                   
-                  database.model.UserEmail.find({ 'userId': { $in: localUserIds } }, function (err2, userEmails) {
-    	              if (err2) {
-    				          res.send(err2, 500);
-                    } else {
-                      var emailMap = _.object(_.pluck(userEmails, 'userId'), _.pluck(userEmails, 'email'));
-                  
-	                    // Add users to users array
-	                    var users = new Array();
-	                  
-	                    serverFileUsers.forEach(function (serverFileUser) {
-	                      var localUser = userMap[serverFileUser.userId];
-	                      var name = localUser.name;
-                        var email = emailMap[localUser._id];
-                        var text = name ? name + (email ? ' <' + email + '>' : '') : email;
+                    serverFileUsers.forEach(function (serverFileUser) {
+                      var localUser = userMap[serverFileUser.userId];
+                      var name = localUser.name;
+                      var email = emailMap[localUser._id];
+                      var text = name ? name + (email ? ' <' + email + '>' : '') : email;
 
-	                      users.push({
-		                      userId: serverFileUser.userId,
-		                      role: serverFileUser.role,
-		                      name: text || 'Anonymous'
-	      	              });
-	                    });
-	                  
-	                    client.getFile(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(fileData, fileResponse) {
-	                      if (userListResponse.statusCode >= 200 && userListResponse.statusCode <= 299) {
-  	                      res.render('edit_ckeditor', {
-      		                  title : fileData.name,
-      		                  users: users,
-      		           	      loggedUser: req.user
-      		                });
-	                      } else {
-	                        res.send("Error occured while retriving file from Co-Ops server.", 500);
-	                      }
-	                    });
-  		              }
-                  });
-                }
-              });
-              
-            } else {
-              res.send("Error occured while listing user files from Co-Ops server.", 500);
-            }
+                      users.push({
+	                      userId: serverFileUser.userId,
+	                      role: serverFileUser.role,
+	                      name: text || 'Anonymous'
+      	              });
+                    });
+                  
+                    client.getFile(req.user, req.user.userId, req.params.fileid, function(err4, fileData) {
+                      if (err4) {
+                        res.send(err4, 500);
+                      } else {
+	                      res.render('edit_ckeditor', {
+    		                  title : fileData.name,
+    		                  users: users,
+    		           	      loggedUser: req.user
+    		                });
+                      } 
+                    });
+		              }
+                });
+              }
+            });
           }
         });
       });
@@ -163,7 +154,7 @@
       res.redirect('/');
     } else {
       apiClient.get(function (client) {
-        client.getFile(req.user.accessToken, req.user.userId, req.params.fileid).on('complete', function(fileData, fileResponse) {
+        client.getFile(req.user, req.user.userId, req.params.fileid, function(fileData, fileResponse) {
           res.render('view_ckeditor', {
             title : fileData.name,
             loggedUser: req.user,
@@ -216,8 +207,12 @@
   module.exports.updateUsers = function (req, res) {
     if (req.user) {
       apiClient.get(function (client) {
-        client.updateFileUsers(req.user.accessToken, req.user.userId, req.params.fileid, req.body).on('complete', function(data, response) {
-          res.send("[]", 200);
+        client.updateFileUsers(req.user, req.user.userId, req.params.fileid, req.body, function(err, data) {
+          if (err) {
+            res.send(err, 500);
+          } else {
+            res.send("[]", 200);
+          }
         });
       });
     } else {

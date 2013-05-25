@@ -109,7 +109,7 @@
   function loginCoOps(user, callback) {
     if (!user.accessToken) {
       apiClient.get(function (client) {
-        client.createUser(user.name).on('complete', function(data, response) {
+        client.createUser(user.name, function(data, response) {
           if (response.statusCode >= 200 && response.statusCode <= 299) {
             if (!data) {
               callback("Invalid response from CoOPS server.", null);
@@ -131,7 +131,6 @@
         });
       });
     } else {
-      // TODO: Refresh token
       callback(null, user);
     }
   }
