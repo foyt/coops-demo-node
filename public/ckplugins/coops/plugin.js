@@ -180,7 +180,7 @@ CKEDITOR.coops.CoOps = CKEDITOR.tools.createClass({
     this._restClient = new CKEDITOR.coops.RestClient(this._editor.config.coops.serverUrl);
 
     // TODO: extensions into extension plugins
-    this._joinFile(['dmp'], '1.0.0draft1');
+    this._joinFile(['dmp'], '1.0.0draft2');
   },
   proto : {
     getEditor: function () {
