@@ -12,7 +12,10 @@
         res.redirect('/setup');
       } else {
         if (!req.user) {
-		      res.render('login', { title : 'Login' })
+		      res.render('login', { 
+		        title : 'Login',
+            loggedUser: null
+		      })
 		    } else {
 		      apiClient.get(function (client) {
 		        client.listFiles(req.user, req.user.userId, function(err, data) {
@@ -58,7 +61,11 @@
                 'google-client-id', 'google-client-secret'];
 
     settings.get(keys, function (err, settings) {
-      res.render('setup', { title: "Setup", settings: _.object(_.pluck(settings, 'key'), _.pluck(settings, 'value')) });
+      res.render('setup', { 
+        title: "Setup", 
+        settings: _.object(_.pluck(settings, 'key'), _.pluck(settings, 'value')),
+        loggedUser: req.user
+      });
     });
   };
   
@@ -218,6 +225,14 @@
     } else {
       res.send("Unauthorized", 401);
     }
+  };
+  
+  module.exports.about = function (req, res) {
+    res.render('about', {
+      title : 'CoOps demo (NodeJs)',
+      version: '0.0.1',
+      loggedUser: req.user
+    });
   };
   
 

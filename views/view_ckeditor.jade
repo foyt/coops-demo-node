@@ -1,11 +1,10 @@
 extend layout
+block header
+  div(class="about-container")
+    a(href="/about")
+      |About
 block head
   meta(http-equiv="refresh",content="5")
-block header
-  div(class="login-info")
-    |Logged in as #{loggedUser.name} 
-    a(href="/auth/logout")
-      |Logout
 block content
   h2 
     |#{title}

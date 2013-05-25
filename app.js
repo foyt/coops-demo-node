@@ -54,6 +54,11 @@ app.configure(function () {
   app.get('/', views.root); 
   
   /**
+   * About view
+   */
+  app.get('/about', views.about);
+  
+  /**
    * New file dialog
    */
   app.get('/newfiledialog', views.newFileDialog);

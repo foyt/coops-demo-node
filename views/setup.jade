@@ -1,5 +1,8 @@
 extend layout
 block header
+  div(class="about-container")
+    a(href="/about")
+      |About
 block content
   img(src="/gfx/setup.png",class="view-image") 
   h2
@@ -52,7 +55,3 @@ block content
         |Google Client Secret
       input(name="google-client-secret",type="text",value="#{settings['google-client-secret']||''}")
     input(type="submit", value="Save")
-block footer
-  div(class="footer-left")
-    a(href="https://github.com/anttileppa/coops-server-node")
-      | https://github.com/anttileppa/coops-server-node

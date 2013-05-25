@@ -2,10 +2,9 @@ extend layout
 block head
   script(type='text/javascript',src='/files.js')
 block header
-  div(class="login-info")
-    |Logged in as #{loggedUser.name} 
-    a(href="/auth/logout")
-      |Logout
+  div(class="about-container")
+    a(href="/about")
+      |About  
 block content
   img(src="/gfx/files.png",class="view-image") 
   h2 
@@ -26,9 +25,3 @@ block content
         if ((file.role == 'READER'))
           a(class="list-action",href="/files/#{file.id}/view/ckeditor")
             |View
-block footer
-  div(class="footer-left")
-    a(href="https://github.com/anttileppa/coops-server-node")
-      | https://github.com/anttileppa/coops-server-node
-  div(class="footer-right")
-    | Icons from Crystal Clear and Kids iconsets by Everaldo Coelho and Free Social Icons iconset by Neil Hainsworth

@@ -9,10 +9,6 @@ h1, h2, h3, h4, h5, h6 {
   font-variant: small-caps; 
 }
 
-a {
-  font-variant: small-caps;   
-}
-
 .container {
   border-top: 1px solid #fff;
   border-bottom: 1px solid #fff;
@@ -132,43 +128,23 @@ form input[type="submit"] {
   font-size: 14px;
 }
 
+.about-container, .index-container {
+  float: left;
+  margin-left: 2px;
+}
+
 .login-info {
   float: right;
+}
+
+.about-container a, .index-container a, .login-info a {
+  font-variant: small-caps;   
 }
 
 .footer {
   display: none;
 }
 
-/**
-.footer {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-  padding: 4px;
-  color: rgba(0, 0, 0, 0.8);
-  background: rgba(192, 192, 192, 0.2);
-  font-size: 14px;
-}
-
-.footer-left {
-  background-image: url('/gfx/github.png');
-  background-repeat: no-repeat;
-  background-position: left center;
-  color: #000;
-  float: left;
-}
-
-.footer-left a {
-  margin-left: 20px;
-  color: #000;
-}
-
-.footer-right {
-  float: right;
-}
-**/
 /* Edit View */
 
 .collaborators-button {
