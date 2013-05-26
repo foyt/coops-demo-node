@@ -73,6 +73,17 @@
         this.getFile(retryUser, userId, fileId, callback);
       }, this), callback);
     },
+    getFileRevision: function (user, userId, fileId, revisionNumber, callback) {
+      var request = this.get('/1/users/' + userId + '/files/' + fileId + '?revisionNumber=' + revisionNumber, {
+        headers: {
+          'Authorization': 'Bearer ' + user.accessToken
+        }
+      });
+      
+      this._processRequest(request, user, _.bind(function (retryUser) {
+        this.getFileRevision(retryUser, userId, fileId, revisionNumber, callback);
+      }, this), callback);
+    },
     listFileUsers: function (user, userId, fileId, callback) {
       var request = this.get('/1/users/' + userId + '/files/' + fileId + '/users', {
         headers: {
@@ -82,6 +93,17 @@
       
       this._processRequest(request, user, _.bind(function (retryUser) {
         this.listFileUsers(retryUser, userId, fileId, callback);
+      }, this), callback);
+    },
+    listFileRevisions: function (user, userId, fileId, callback) {
+      var request = this.get('/1/users/' + userId + '/files/' + fileId + '/revisions', {
+        headers: {
+          'Authorization': 'Bearer ' + user.accessToken
+        }
+      });
+      
+      this._processRequest(request, user, _.bind(function (retryUser) {
+        this.listFileRevisions(retryUser, userId, fileId, callback);
       }, this), callback);
     },
     updateFileUsers: function (user, userId, fileId, fileUsers, callback) {

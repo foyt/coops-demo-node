@@ -1,0 +1,31 @@
+extend layout
+block header
+  div(class="index-container")
+    a(href="/")
+      |Index
+  div(class="about-container")
+    a(href="/about")
+      |About
+block content
+  img(src="/gfx/history.png",class="view-image") 
+  h2 
+    |#{title}
+  p(class="info-text")
+    |History of the file
+  table(class="file-history-table")
+    tr
+      th
+        |Revision
+      th
+        |Created
+      th
+        |Creator
+    each revision in revisions
+      tr(class="list-item")
+        td
+          a(href="#{revision.link}")
+            |#{revision.revisionNumber}
+        td
+          |#{revision.created}      
+        td
+          |#{revision.userName}    

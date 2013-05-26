@@ -104,6 +104,10 @@ app.configure(function () {
   
   app.get('/files/:fileid/view/ckeditor', views.fileViewCKEditor);
   
+  app.get('/files/:fileid/history/ckeditor', views.fileHistoryCKEditor);
+  
+  app.get('/files/:fileid/history/ckeditor/:revisionNumber', views.fileRevisionCKEditor);
+  
   // File users
   
   app.post('/files/:fileid/users', views.updateUsers);

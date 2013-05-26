@@ -20,8 +20,14 @@ block content
       div(class="list-item")
         |#{file.name}
         if ((file.role == 'OWNER')||(file.role == 'WRITER'))
-          a(class="list-action",href="/files/#{file.id}/edit/ckeditor")
+          a(class="list-action ui-widget-content ui-corner-all",href="/files/#{file.id}/edit/ckeditor")
             |Edit
-        if ((file.role == 'READER'))
-          a(class="list-action",href="/files/#{file.id}/view/ckeditor")
+          a(class="list-action ui-widget-content ui-corner-all",href="/files/#{file.id}/view/ckeditor")
             |View
+          a(class="list-action ui-widget-content ui-corner-all",href="/files/#{file.id}/history/ckeditor")
+            |History
+        if ((file.role == 'READER'))
+          a(class="list-action ui-widget-content ui-corner-all",href="/files/#{file.id}/view/ckeditor")
+            |View
+          a(class="list-action ui-widget-content ui-corner-all",href="/files/#{file.id}/history/ckeditor")
+            |History

@@ -18,13 +18,13 @@
 		      })
 		    } else {
 		      apiClient.get(function (client) {
-		        client.listFiles(req.user, req.user.userId, function(err, data) {
+		        client.listFiles(req.user, req.user.userId, function(err, files) {
 		          if (err) {
   		          res.send(err, 500);
 		          } else {
 		            res.render('files', { 
 		              title : 'Files', 
-		              files: data.files,
+		              files: files,
 		              loggedUser: req.user
 		            });
 		          }
@@ -161,12 +161,102 @@
       res.redirect('/');
     } else {
       apiClient.get(function (client) {
-        client.getFile(req.user, req.user.userId, req.params.fileid, function(fileData, fileResponse) {
-          res.render('view_ckeditor', {
-            title : fileData.name,
-            loggedUser: req.user,
-            content: fileData.content
-          });
+        client.getFile(req.user, req.user.userId, req.params.fileid, function(err, fileData) {
+          if (err) {
+            res.send(err, 500);
+          } else {
+            res.render('view_ckeditor', {
+              title : fileData.name,
+              loggedUser: req.user,
+              content: fileData.content
+            });
+          }
+        });
+      });
+    }
+  };
+  
+  module.exports.fileHistoryCKEditor = function (req, res) {
+    if (!req.user) {
+      res.redirect('/');
+    } else {
+      apiClient.get(function (client) {
+        client.getFile(req.user, req.user.userId, req.params.fileid, function(err1, fileData) {
+          if (err1) {
+            res.send(err1, 500);
+          } else {
+            client.listFileRevisions(req.user, req.user.userId, req.params.fileid, function(err2, fileRevisions) {
+              if (err2) {
+                res.send(err2, 500);
+              } else {
+                var serverUserIds = _.uniq(_.pluck(fileRevisions, 'userId'));
+                database.model.User.find({ 'userId': { $in: serverUserIds } }, function (err3, users) {
+                  if (err3) {
+                    res.send(err3, 500);
+                  } else {
+                    var localUserIds = _.pluck(users, '_id');
+                    var userMap = new Object();
+                    users.forEach(function (user) {
+                      userMap[user.userId] = user;
+                    });
+                    
+                    database.model.UserEmail.find({ 'userId': { $in: localUserIds } }, function (err4, userEmails) {
+                      if (err4) {
+                        res.send(err4, 500);
+                      } else {
+                        var emailMap = _.object(_.pluck(userEmails, 'userId'), _.pluck(userEmails, 'email'));
+                        
+                        var revisions = new Array();
+                        fileRevisions.forEach(function (fileRevision) {
+                          var localUser = userMap[fileRevision.userId];
+                          var name = localUser.name;
+                          var email = emailMap[localUser._id];
+                          var text = name ? name + (email ? ' <' + email + '>' : '') : email;
+                          var created = new Date(Date.parse(fileRevision.created));
+
+                          revisions.push({
+                            revisionNumber: fileRevision.revisionNumber,
+                            userName: text || 'Anonymous',
+                            created: created.toUTCString(),
+                            link: '/files/' + req.params.fileid + '/history/ckeditor/' + fileRevision.revisionNumber
+                          });
+                        });
+                        
+                        res.render('history_ckeditor', {
+                          title : fileData.name,
+                          loggedUser: req.user,
+                          revisions: revisions
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      });
+    }
+  };
+  
+  module.exports.fileRevisionCKEditor = function (req, res) {
+    if (!req.user) {
+      res.redirect('/');
+    } else {
+      apiClient.get(function (client) {
+        client.getFileRevision(req.user, req.user.userId, req.params.fileid, req.params.revisionNumber, function(err1, fileRevision) {
+          if (err1) {
+            res.send(err1, 500);
+          } else {
+            res.render('revision_ckeditor', {
+              title : fileRevision.name,
+              backLink: '/files/' + req.params.fileid + '/history/ckeditor',
+              revisionNumber: fileRevision.revisionNumber,
+              created: new Date(Date.parse(fileRevision.modified)).toUTCString(),
+              loggedUser: req.user,
+              content: fileRevision.content
+            });
+          }
         });
       });
     }

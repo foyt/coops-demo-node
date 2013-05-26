@@ -4,6 +4,9 @@ block head
   script(type="text/javascript",src="/edit-ckeditor.js")
   script(type="text/javascript",src="/collaborator-dialog.js")
 block header
+  div(class="index-container")
+    a(href="/")
+      |Index
   div(class="about-container")
     a(href="/about")
       |About
@@ -12,5 +15,43 @@ block content
     |#{title}
   p(class="info-text")
     |This 
+  img(src="/gfx/users.png",class="collaborators-button") 
+  div(id="collaborators-dialog",style="display:none",title="Collaborators")
+    div(class="ui-widget")
+      div(class="collaborators-dialog-title")
+        |Document users
+      div(class="collaborators-dialog-users-container")
+        table(class="ui-widget")
+          each user in users
+            tr
+              td
+                |#{user.name||user.email||'Anonymous'}
+              td
+                if (user.role === 'OWNER') 
+                  select(data-id="#{user.userId}",disabled="disabled")
+                    option(value="OWNER",SELECTED="selected")
+                      |Owner
+                else
+                  select(data-id="#{user.userId}")
+                    optgroup(label="Role")
+                      if (user.role === 'WRITER') 
+                        option(value="WRITER",SELECTED="selected")
+                          |Writer
+                      else
+                        option(value="WRITER")
+                          |Writer
+                      if (user.role === 'READER') 
+                        option(value="READER",SELECTED="selected")
+                          |Reader
+                      else
+                        option(value="READER")
+                          |Reader
+                    optgroup(label="Remove")
+                      option(value="NONE")
+                        |Remove
+    div(class="collaborators-add-container ui-widget")
+      div(class="collaborators-dialog-title")
+        |Add new collaborators
+      input(id="collaborators-select")
   div(class="editor")
     div(id="ckcontainer")

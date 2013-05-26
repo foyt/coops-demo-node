@@ -67,10 +67,13 @@ form input[type="submit"] {
 }
 
 .list-item:hover {
-  background-color: #666;   
-  padding-left: 4px;
+	border: 1px solid #d49768;
+	background-color: #cb842e;   
+  padding-left: 3px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-right: 3px;
   margin-left: -4px;
-  padding-right: 4px;
   margin-right: -4px;
   color: #fff;
 }
@@ -78,11 +81,18 @@ form input[type="submit"] {
 .list-action {
   float: right;
   margin-right: 4px;
-  color: #000;
+  margin-left: 4px;
+  min-width: 60px;
+  padding: 2px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 13px;
+  height: 13px;
 }
 
-.list-item:hover .list-action {
-  color: #fff;
+.back-link-container {
+  margin-bottom: 16px;
+  margin-top: -8px;
 }
 
 .view-image {
@@ -131,6 +141,7 @@ form input[type="submit"] {
 .about-container, .index-container {
   float: left;
   margin-left: 2px;
+  margin-right: 8px;
 }
 
 .login-info {
@@ -229,10 +240,19 @@ form input[type="submit"] {
   border: 1px solid #000;
 }
 
-.ck-viewer {
+.ck-viewer, .ck-revision-viewer {
   padding: 20px;
   margin-left: auto;
   margin-right: auto;
   background: #fff;
   border: 1px solid #aaa;
+}
+
+/* CKEditor History */
+table.file-history-table {
+  width: 100%;
+}
+
+table.file-history-table tr td {
+  text-align: center;
 }

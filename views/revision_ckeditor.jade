@@ -1,0 +1,15 @@
+extend layout
+block header
+  div(class="index-container")
+    a(href="/")
+      |Index
+  div(class="about-container")
+    a(href="/about")
+      |About
+block content
+  h2 
+    |#{title} - Revision #{revisionNumber} (#{created})
+  div(class="back-link-container")
+    a(class="back-link", href="#{backLink}")
+      |All Revisions
+  div(class="ck-revision-viewer")!= content
