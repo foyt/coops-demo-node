@@ -12,10 +12,11 @@ var views = require('./views');
 var api = require('./api');
 var apiClient = require('./apiclient');
 
-if (process.env.COOPS_DEMO_UNSECURE_PORT) {
+var unsecurePort = process.env.COOPS_DEMO_UNSECURE_PORT || process.env.PORT;
+if (unsecurePort) {
   var unsecureServer = http.createServer(app);
-  unsecureServer.listen(process.env.COOPS_DEMO_UNSECURE_PORT);
-  console.log("Listening unsecure port " + process.env.COOPS_DEMO_UNSECURE_PORT);
+  unsecureServer.listen(unsecurePort);
+  console.log("Listening unsecure port " + unsecurePort);
 }
 
 if (process.env.COOPS_DEMO_SECURE_PORT && process.env.COOPS_DEMO_SECURE_CERT && process.env.COOPS_DEMO_SECURE_CERT_KEY) {
