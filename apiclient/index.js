@@ -1,183 +1,175 @@
 (function() {
-  var rest = require('restler');
+  
+  var request = require('request');
   var settings = require('../settings');
   var _ = require('underscore');
   var client = null;
   var database = require('../database');
   
-  Client = rest.service(function(baseUrl, clientId, clientSecret) {
-    this.baseURL = baseUrl;
+  function Client(baseUrl, clientId, clientSecret) {
+    this._baseURL = baseUrl;
     this._clientId = clientId;
     this._clientSecret = clientSecret;
-  }, { }, {
-    createUser: function(name, callback) {
-      var request = this.post('/1/users', {
-        username: this._clientId,
-        password: this._clientSecret,
-        data: {
-          name: name
-        }
-      });
-      
-      request.on('complete', function(data, response) {
-        callback(data, response);
-      });
+  }
+  
+  Client.prototype = Object.create(null, {
+    constructor: {
+      value: Client,
+      enumerable: false
     },
     
-    listFiles: function (user, userId, callback) {
-      var request = this.get('/1/users/' + userId + '/files', {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken
-        }
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.listFiles(retryUser, userId, callback);
-      }, this), callback);
+    createUser: {
+      value: function(name, callback) {
+        this._doRequest("POST", '/1/users', this._clientId, this._clientSecret, { }, {
+          name: name
+        }, function (error, response, body) {
+          if (error) {
+            callback(error, null);
+          } else {
+            if (response.statusCode == 200) {
+              callback(error, body);
+            } else {
+              callback("Could not create user", null);
+            }
+          }
+        });
+      }
     },
-    createFile: function (user, userId, name, content, contentType, callback) {
-      var request = this.post('/1/users/' + userId + '/files', {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken
-        },
-        data: {
+    
+    listFiles: {
+      value: function (user, userId, callback) {
+        this._doBearerRequest("GET", user, '/1/users/' + userId + '/files', {}, callback);
+      }
+    },
+    
+    createFile: {
+      value: function (user, userId, name, content, contentType, callback) {
+        this._doBearerRequest("POST", user, '/1/users/' + userId + '/files', {
           name: name,
           content: content,
           contentType: contentType
-        }
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.createFile(retryUser, userId, name, content, contentType, callback);
-      }, this), callback);
-    },
-    joinFile: function (user, userId, fileId, algorithm, protocolVersion, callback) {
-      var request = this.get('/1/users/' + userId + '/files/' + fileId + '/join?algorithm=' + algorithm + '&protocolVersion=' +  protocolVersion, {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken
-        }
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.joinFile(retryUser, userId, fileId, algorithm, protocolVersion, callback);
-      }, this), callback);
-    },
-    getFile: function (user, userId, fileId, callback) {
-      var request = this.get('/1/users/' + userId + '/files/' + fileId, {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken
-        }
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.getFile(retryUser, userId, fileId, callback);
-      }, this), callback);
-    },
-    getFileRevision: function (user, userId, fileId, revisionNumber, callback) {
-      var request = this.get('/1/users/' + userId + '/files/' + fileId + '?revisionNumber=' + revisionNumber, {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken
-        }
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.getFileRevision(retryUser, userId, fileId, revisionNumber, callback);
-      }, this), callback);
-    },
-    listFileUsers: function (user, userId, fileId, callback) {
-      var request = this.get('/1/users/' + userId + '/files/' + fileId + '/users', {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken
-        }
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.listFileUsers(retryUser, userId, fileId, callback);
-      }, this), callback);
-    },
-    listFileRevisions: function (user, userId, fileId, callback) {
-      var request = this.get('/1/users/' + userId + '/files/' + fileId + '/revisions', {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken
-        }
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.listFileRevisions(retryUser, userId, fileId, callback);
-      }, this), callback);
-    },
-    updateFileUsers: function (user, userId, fileId, fileUsers, callback) {
-      var request = this.post('/1/users/' + userId + '/files/' + fileId + '/users', {
-        headers: {
-          'Authorization': 'Bearer ' + user.accessToken,
-          'Content-Type': 'application/json; charset=utf-8'
-        },
-        data: JSON.stringify(fileUsers)
-      });
-      
-      this._processRequest(request, user, _.bind(function (retryUser) {
-        this.updateFileUsers(retryUser, userId, fileId, fileUsers, callback);
-      }, this), callback);
-    },
-
-    _processRequest: function (request, user, retry, callback) {
-      request.on('complete', _.bind(function(data, response) {
-        if (!response) {
-          callback("Could not connect to Co-Ops server.", null);
-        } else {
-          if (response.statusCode == 401) {
-            // Token expired or revoked 
-            this._refreshToken(user, _.bind(function (err, user) {
-              if (err) {
-                callback(err, null);
-              } else {
-                if (user) {
-                  retry(user);
-                } else {
-                  callback("Could not refresh expired or revoked token.", null);
-                }
-              }
-            }, this));
-          } else {
-            if (response.statusCode >= 200 && response.statusCode <= 299) {
-              callback(null, data);
-            } else {
-              callback(response.message, null);
-            }
-          }
-        }
-      }, this));
+        }, callback);
+      }
     },
     
-    _refreshToken: function (user, callback) {
-      var request = this.post('/oauth2/token', {
-        username: this._clientId,
-        password: this._clientSecret,
-        data: {
+    joinFile: {
+      value: function (user, userId, fileId, algorithm, protocolVersion, callback) {
+        this._doBearerRequest("GET", user, '/1/users/' + userId + '/files/' + fileId + '/join?algorithm=' + algorithm + '&protocolVersion=' +  protocolVersion, {}, callback);
+      }
+    },
+    
+    getFile: {
+      value: function (user, userId, fileId, callback) {
+        this._doBearerRequest("GET", user, '/1/users/' + userId + '/files/' + fileId, {}, callback);
+      }
+    },
+    
+    getFileRevision: {
+      value: function (user, userId, fileId, revisionNumber, callback) {
+        this._doBearerRequest("GET", user, '/1/users/' + userId + '/files/' + fileId + '?revisionNumber=' + revisionNumber, {}, callback);
+      }
+    },
+    
+    listFileUsers: {
+      value: function (user, userId, fileId, callback) {
+        this._doBearerRequest("GET", user, '/1/users/' + userId + '/files/' + fileId + '/users', {}, callback);
+      }
+    },
+    
+    listFileRevisions: {
+      value: function (user, userId, fileId, callback) {
+        this._doBearerRequest("GET", user, '/1/users/' + userId + '/files/' + fileId + '/revisions', {}, callback);
+      }
+    },
+    
+    updateFileUsers: {
+      value: function (user, userId, fileId, fileUsers, callback) {
+        this._doBearerRequest("POST", user, '/1/users/' + userId + '/files/' + fileId + '/users', fileUsers, callback);
+      }
+    },
+
+    _doBearerRequest: {
+      value: function (method, user, url, parameters, callback) {
+        this._doRequest(method, url, null, null, {
+          'Authorization': 'Bearer ' + user.accessToken
+        }, parameters, _.bind(function (error, response, body) {
+          if (error) {
+            callback(error, null);
+          } else {
+            if (response.statusCode == 401) {
+              // Token expired or revoked 
+              this._refreshToken(user, _.bind(function (err, user) {
+                if (err) {
+                  callback(err, null);
+                } else {
+                  if (user) {
+                    this._doBearerRequest(method, user, url, parameters, callback);
+                  } else {
+                    callback("Could not refresh expired or revoked token.", null);
+                  }
+                }
+              }, this));
+            } else {
+              if (response.statusCode >= 200 && response.statusCode <= 299) {
+                callback(null, body);
+              } else {
+                callback(response.message, null);
+              }
+            }
+          }
+        }, this));
+      }
+    },
+    
+    _doRequest: {
+      value: function (method, url, username, password, headers, body, callback) {
+        var options = {
+          uri: this._baseURL + url,
+          method: method,
+          headers: headers,
+          json: body
+        };
+        
+        if (username || password) {
+          options.auth = {
+            username: username,
+            password: password
+          };
+        }
+        
+        request(options, callback);
+      }
+    },
+
+    _refreshToken: {
+      value: function (user, callback) {
+        this._doRequest('POST', '/oauth2/token', this._clientId, this._clientSecret, {}, {
           "refresh_token": user.refreshToken,
           "grant_type": "refresh_token"
-        }
-      });
-      
-      request.on('complete', function(data, response) {
-        if (response.statusCode == 200) {
-          user.accessToken = data['access_token'];
-          user.tokenExpires = new Date().getTime() + data['expires_in'];
-          
-          user.save(function (err, savedUser) {
-            if (err) {
-              callback(err, null);
+        }, function (error, response, data) {
+          if (error) {
+            callback(error, null);
+          } else {
+            if (response.statusCode == 200) {
+              user.accessToken = data['access_token'];
+              user.tokenExpires = new Date().getTime() + data['expires_in'];
+              
+              user.save(function (err, savedUser) {
+                if (err) {
+                  callback(err, null);
+                } else {
+                  callback(null, user);            
+                }
+              });
             } else {
-              callback(null, user);            
+              callback("Could not refresh token", null);
             }
-          });
-        } else {
-          callback("Could not refresh token", null);
-        }
-      });
+          }
+        });
+      }
     }
   });
-  
+
   module.exports = {
     get: function (callback) {
       if (client) {

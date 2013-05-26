@@ -1,5 +1,6 @@
 (function() {
 
+  var request = require('request');
   var passport = require('passport');
   var FacebookStrategy = require('passport-facebook').Strategy;
   var GitHubStrategy = require('passport-github').Strategy;
@@ -8,7 +9,6 @@
   var database = require('./database.js');
   var apiClient = require('./apiclient');
   var settings = require('./settings');
-  var rest = require('restler');
   var _ = require('underscore');
   
   function resolveUser(identifier, emails, callback) {
@@ -109,24 +109,20 @@
   function loginCoOps(user, callback) {
     if (!user.accessToken) {
       apiClient.get(function (client) {
-        client.createUser(user.name, function(data, response) {
-          if (response.statusCode >= 200 && response.statusCode <= 299) {
-            if (!data) {
-              callback("Invalid response from CoOPS server.", null);
-            } else {
-	            var tokenResponse = data['access_token'];
-
-	            user.userId = data['user_id'];
-	            user.accessToken = tokenResponse['access_token'];
-	            user.refreshToken = tokenResponse['refresh_token'];
-	            user.tokenExpires = new Date().getTime() + tokenResponse['expires_in'];
-	          
-	            user.save(function (err, user) {
-	              callback(err, user);
-	            });
-            }
+        client.createUser(user.name, function(err, data) {
+          if (err) {
+            callback(err, null);
           } else {
-            callback("Could not connect to Co-Ops Server.", null);
+            var tokenResponse = data['access_token'];
+
+            user.userId = data['user_id'];
+            user.accessToken = tokenResponse['access_token'];
+            user.refreshToken = tokenResponse['refresh_token'];
+            user.tokenExpires = new Date().getTime() + tokenResponse['expires_in'];
+          
+            user.save(function (err, user) {
+              callback(err, user);
+            });
           }
         });
       });
@@ -184,24 +180,32 @@
             var identifier = 'github-' + profile.id;
             var emails = _.pluck(profile.emails, 'value');
 
-            rest.get('https://api.github.com/user/emails', {
+            request({
+              uri: 'https://api.github.com/user/emails',
+              method: 'GET',
               headers: {
                 'Accept': 'application/vnd.github.v3',
-                'Authorization': 'token ' + accessToken
+                'Authorization': 'token ' + accessToken,
+                'User-Agent': 'coops-demo-node'
               }
-            }).on('complete', function(result) {
-  			  if (result instanceof Error) {
-  			    done(result, null);
-  			  } else {
-  			    var emails = _.pluck(result, 'email');
-  			    var name = profile.displayName || profile.username || 'Anonymous';
-  			    loginUser(identifier, emails, name, function (err, user) {
-	              loginCoOps(user, function (err, loggedUser) {
-	                done(err, loggedUser);              
-	              });
-	            });
-  			  }
-	        });
+            }, function (error, response, body) {
+            
+              if (error) {
+                done(body, null);
+              } else {
+                if (response.statusCode == 200){
+                  var result = JSON.parse(body);
+                  
+                  var emails = _.pluck(result, 'email');
+                  var name = profile.displayName || profile.username || 'Anonymous';
+                  loginUser(identifier, emails, name, function (err, user) {
+                    loginCoOps(user, function (err, loggedUser) {
+                      done(err, loggedUser);              
+                    });
+                  });
+                }
+              }
+            });
           });
         }
       ));
