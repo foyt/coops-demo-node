@@ -7,6 +7,7 @@
   var database = require('../database');
   
   function Client(baseUrl, clientId, clientSecret) {
+    console.log("New CoOps client created. Using server at " + baseUrl);
     this._baseURL = baseUrl;
     this._clientId = clientId;
     this._clientSecret = clientSecret;

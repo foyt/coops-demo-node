@@ -107,12 +107,18 @@
   }
   
   function loginCoOps(user, callback) {
+    console.log("Logging into CoOps server");
+    
     if (!user.accessToken) {
+      console.log("User does not have a accessToken, creating new user");
+      
       apiClient.get(function (client) {
         client.createUser(user.name, function(err, data) {
           if (err) {
+            console.error("Could not create new user: " + err);
             callback(err, null);
           } else {
+            console.error("New user created");
             var tokenResponse = data['access_token'];
 
             user.userId = data['user_id'];
@@ -127,6 +133,7 @@
         });
       });
     } else {
+      console.error("User found, logging in");
       callback(null, user);
     }
   }
