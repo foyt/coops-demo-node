@@ -7,7 +7,7 @@
   var database = require('../database');
   
   function Client(baseUrl, clientId, clientSecret) {
-    console.log("New CoOps client created. Using server at " + baseUrl);
+    console.log("CoOps Client: New CoOps client created. Using server at " + baseUrl);
     this._baseURL = baseUrl;
     this._clientId = clientId;
     this._clientSecret = clientSecret;
@@ -124,6 +124,8 @@
     
     _doRequest: {
       value: function (method, url, username, password, headers, body, callback) {
+        console.log("CoOps Client: " + method + " request into " + url);
+        
         var options = {
           uri: this._baseURL + url,
           method: method,
