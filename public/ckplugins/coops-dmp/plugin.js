@@ -85,6 +85,10 @@
               // XmlDiffJs patching did not go well, falling back to setData 
               this.getEditor().setData(newText);
             }
+            
+            editor.fire("CoOPS:PatchApplied", {
+              content : newText
+            });
 	        },
 	        
 	        _revertDocument: function (currentContent, localPatch, callback) {
@@ -154,18 +158,22 @@
 	        },
 	        
 	        _applyPatch: function (patch, patchChecksum, callback) {
+	          console.log("Incoming patch");
 	          this.getEditor().document.$.normalize();
             var currentContent = this.getEditor().getData();
-            var patchBaseContent = null;
+            var patchBaseContent = this.getEditor().getCoOps().getSavedContent();
+            if (patchBaseContent === null) {
+              patchBaseContent = currentContent;
+              console.log("Saved content missing. Patching against current content");
+            }
+            
             var localPatch = null;
+            var locallyChanged = this.getEditor().getCoOps().isLocallyChanged();
 
-            if (this.getEditor().getCoOps().isLocallyChanged()) {
-              patchBaseContent = this.getEditor().getCoOps().getSavedContent();
+            if (locallyChanged) {
               var localDiff = this._diffMatchPatch.diff_main(patchBaseContent, this.getEditor().getCoOps().getUnsavedContent());
               this._diffMatchPatch.diff_cleanupEfficiency(localDiff);
               localPatch = this._diffMatchPatch.patch_make(patchBaseContent, localDiff);
-            } else {
-              patchBaseContent = currentContent;
             }
             
             var remoteDiff = this._diffMatchPatch.patch_fromText(patch);
@@ -174,11 +182,10 @@
             if (this._isPatchApplied(removePatchResult)) {
               var remotePatchedText = removePatchResult[0];
               var remotePatchedChecksum = crc.crc32(remotePatchedText);
-
-              if ((patchChecksum != remotePatchedChecksum)) {
+              
+              if (patchChecksum != remotePatchedChecksum) {
                 console.log("Reverting document because checksum did not match");
                 this._revertDocument(currentContent, localPatch, CKEDITOR.tools.bind(function () {
-                  // TODO: Apply local changes...
                   callback();
                 }), this);
               } else {
@@ -198,7 +205,6 @@
             } else {
               console.log("Reverting document because could not apply the patch");
               this._revertDocument(currentContent, localPatch, CKEDITOR.tools.bind(function () {
-                // TODO: Apply local changes...
                 callback();
               }), this);
             }
