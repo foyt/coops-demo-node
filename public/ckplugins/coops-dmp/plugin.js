@@ -158,13 +158,13 @@
 	        },
 	        
 	        _applyPatch: function (patch, patchChecksum, callback) {
-	          console.log("Incoming patch");
+	          this._coOps.log("Incoming patch");
 	          this.getEditor().document.$.normalize();
             var currentContent = this.getEditor().getData();
             var patchBaseContent = this.getEditor().getCoOps().getSavedContent();
             if (patchBaseContent === null) {
               patchBaseContent = currentContent;
-              console.log("Saved content missing. Patching against current content");
+              this._coOps.log("Saved content missing. Patching against current content");
             }
             
             var localPatch = null;
@@ -184,7 +184,7 @@
               var remotePatchedChecksum = crc.crc32(remotePatchedText);
               
               if (patchChecksum != remotePatchedChecksum) {
-                console.log("Reverting document because checksum did not match");
+                this._coOps.log("Reverting document because checksum did not match");
                 this._revertDocument(currentContent, localPatch, CKEDITOR.tools.bind(function () {
                   callback();
                 }), this);
@@ -203,7 +203,7 @@
               }
               
             } else {
-              console.log("Reverting document because could not apply the patch");
+              this._coOps.log("Reverting document because could not apply the patch");
               this._revertDocument(currentContent, localPatch, CKEDITOR.tools.bind(function () {
                 callback();
               }), this);

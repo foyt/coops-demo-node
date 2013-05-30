@@ -209,6 +209,12 @@
           _this._startSession(responseJson);
         });
       },
+      log: function () {
+        if (window.console && console.log) {
+          console.log(arguments);
+        }
+      },
+      
       _startSession: function(joinData) {
         var content = joinData.content;
         
@@ -301,22 +307,22 @@
       });
     
       editor.on('CoOPS:SessionStart', function(event) {
-        console.log("SessionStart: updated saved content");
+        this._coOps.log("SessionStart: updated saved content");
         this._coOps.setSavedContent(this.getData());
       });
     
       editor.on('CoOPS:PatchAccepted', function(event) {
-        console.log("PatchAccepted: updated saved content");
+        this._coOps.log("PatchAccepted: updated saved content");
         this._coOps.setSavedContent(this.getData());
       });
     
       editor.on('CoOPS:ContentReverted', function(event) {
-        console.log("ContentReverted: updated saved content");
+        this._coOps.log("ContentReverted: updated saved content");
         this._coOps.setSavedContent(event.data.content);
       });
     
       editor.on('CoOPS:PatchApplied', function(event) {
-        console.log("PatchApplied: updated saved content");
+        this._coOps.log("PatchApplied: updated saved content");
         this._coOps.setSavedContent(event.data.content);
       });
   
