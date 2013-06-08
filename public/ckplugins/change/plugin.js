@@ -257,8 +257,8 @@
       }
 
       if (changeObserver == null) {
-        if (CKEDITOR.env.webkit || (CKEDITOR.env.ie && CKEDITOR.env.version >= 9)) {
-          // WebKit and IE 9 support DOMSubtreeModified
+        if ((CKEDITOR.env.ie && CKEDITOR.env.version == 9)) {
+          // IE 9 support DOMSubtreeModified
           changeObserver = new DOMSubtreeModifiedChangeObserver(editor);
         } else {
           // Otherwise we fallback to polling
