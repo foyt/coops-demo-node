@@ -5,169 +5,18 @@
   
   var PROTOCOL_VERSION = '1.0.0draft2'
   
-  CKEDITOR.coops.DifferenceAlgorithm = CKEDITOR.tools.createClass({   
+  CKEDITOR.coops.Feature = CKEDITOR.tools.createClass({   
     $: function(editor) {
       this._editor = editor;
     },
     proto : {
       getEditor: function () {
         return this._editor;
-      }
-    }
-  });
-  
-  CKEDITOR.coops.Connector = CKEDITOR.tools.createClass({   
-    $: function(editor) {
-      this._editor = editor;
-    },
-    proto : {
-      getEditor: function() {
-        return this._editor;
-      }
-    }
-  });
-  
-  CKEDITOR.coops.RestClient = CKEDITOR.tools.createClass({   
-    $: function(serverUrl) {
-      this._serverUrl = serverUrl;
-      this._methodOverrideExtension = null;
-    },
-    proto : {
-      setMethodOverrideExtension: function (methodOverrideExtension) {
-        this._methodOverrideExtension = methodOverrideExtension;
       },
-    
-      fileJoin: function (algorithms, protocolVersion, callback) {
-        var parameters = new Array();
-        for (var i = 0, l = algorithms.length; i < l; i++) {
-          parameters.push({
-            name: 'algorithm',
-            value: algorithms[i]
-          });
-        }
-        
-        parameters.push({
-          name: 'protocolVersion',
-          value: protocolVersion
-        });
-      
-        var url =  this._serverUrl + '/join';
-  
-        this._doGet(url, parameters, callback);
+      getName: function () {
+        return null;
       },
-      
-      fileGet: function (callback) {
-        var url =  this._serverUrl;
-        this._doGet(url, {}, callback);
-      },
-      
-      _doGet: function (url, parameters, callback) {
-        this._doGetRequest(url, parameters, function (status, responseText) {
-          if (!responseText) {
-            // Request was probably aborted...
-            return;
-          }
-          
-          try {
-            if (status != 200) {
-              callback(status, null, responseText);
-            } else {
-              var responseJson = eval("(" + responseText + ")");
-              callback(status, responseJson, null);
-            }
-          } catch (e) {
-            callback(status, null, e);
-          }
-          
-        });
-      },
-      _doPost: function (url, object, callback) {
-        this._doJsonPostRequest("post", url, object, callback);
-      },
-      _doPut: function (url, object, callback) {
-        this._doJsonPostRequest("put", url, object, callback);
-      },
-      _doPatch: function (url, object, callback) {
-        this._doJsonPostRequest("patch", url, object, callback);
-      },
-      _doDelete: function (url, object, callback) {
-        this._doJsonPostRequest("delete", url, object, callback);
-      },
-      _doJsonPostRequest: function (method, url, object, callback) {
-        var data = this._toJsonString(object);
-  
-        this._doPostRequest(method, url, encodeURIComponent(data), function (status, responseText) {
-          if (!responseText) {
-            // Request was probably aborted...
-            return;
-          }
-          
-          try {
-            if (status != 200) {
-              callback(status, null, responseText);
-            } else {
-              var responseJson = eval("(" + responseText + ")");
-              callback(status, responseJson, null);
-            }
-          } catch (e) {
-            callback(status, null, e);
-          }
-        });
-      },
-  
-      _processParameters: function (parameters) {
-        var result = '';
-        if ((parameters) && (parameters.length > 0)) {
-          for (var i = 0, l = parameters.length; i < l; i++) {
-            if (i > 0) {
-              result += '&';
-            }
-            result += encodeURIComponent(parameters[i].name) + '=' + encodeURIComponent(parameters[i].value);  
-          }
-        }
-        
-        return result;
-      }, 
-      
-      _doGetRequest: function (url, parameters, callback) {
-        var xhr = this._createXMLHttpRequest();
-        xhr.open("get", url + ((parameters.length > 0) ? '?' + this._processParameters(parameters) : ''), false);
-        xhr.send(null);
-        callback(xhr.status, xhr.responseText);
-      },
-          
-      _doPostRequest: function (method, url, data, callback) {
-        var xhr = this._createXMLHttpRequest();
-        xhr.open("post", url, false);
-        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        
-        if (!CKEDITOR.env.webkit) {
-          // WebKit refuses to send these headers as unsafe
-          xhr.setRequestHeader("Content-length", data ? data.length : 0);
-          xhr.setRequestHeader("Connection", "close");
-        }
-        
-        if (method != 'post') {
-          switch (this._methodOverrideExtension) {
-            case 'x-http-method-override':
-              xhr.setRequestHeader('x-http-method-override', method);
-            break;
-            default:
-              throw new Error("methodOverrideExtension is not set");
-            break;
-          }
-        }
-        
-        xhr.send(data);
-        
-        callback(xhr.status, xhr.responseText);
-      },
-      
-      _createXMLHttpRequest: function() {
-        if ( !CKEDITOR.env.ie || location.protocol != 'file:' )
-        try { return new XMLHttpRequest(); } catch(e) {}
-        try { return new ActiveXObject( 'Msxml2.XMLHTTP' ); } catch (e) {}
-        try { return new ActiveXObject( 'Microsoft.XMLHTTP' ); } catch (e) {}
+      getRequiredScripts: function () {
         return null;
       }
     }
@@ -179,14 +28,10 @@
       this._lastSelectionRanges = null;
       this._unsavedContent = null;
       this._savedContent = null;
-      this._restClient = new CKEDITOR.coops.RestClient(this._editor.config.coops.serverUrl);
     },
     proto : {
       getEditor: function () {
         return this._editor;
-      },
-      getRestClient: function(callback) {
-        return this._restClient;
       },
       isLocallyChanged: function () {
         return (this._unsavedContent != null) && (this._savedContent != null) && (this._unsavedContent != this._savedContent);
@@ -202,86 +47,6 @@
       },
       setSavedContent: function (savedContent) {
         this._unsavedContent = this._savedContent = savedContent;
-      },
-      joinFile: function (algorithms, protocolVersion) {
-        var _this = this;
-        this._restClient.fileJoin(algorithms, protocolVersion, function (status, responseJson, error) {
-          _this._startSession(responseJson);
-        });
-      },
-      log: function () {
-        if (window.console && console.log) {
-          console.log(arguments);
-        }
-      },
-      
-      _startSession: function(joinData) {
-        var content = joinData.content;
-        
-        this.getEditor().getChangeObserver().pause();
-        try {
-          this.getEditor().getSelection().removeAllRanges();
-          this.getEditor().setData(content);
-        } finally {
-          this.getEditor().getChangeObserver().reset();
-          this.getEditor().getChangeObserver().resume();
-        }
-  
-        var extensions = joinData.extensions;
-       
-        if (extensions.indexOf('x-http-method-override') > -1) {
-          this._restClient.setMethodOverrideExtension('x-http-method-override');
-        } else {
-          // Proper error handling
-          throw new Error('Server does not support x-http-method-override extension, which is required by this plugin');
-        }
-        
-        this.getEditor().fire("CoOPS:SessionStart", {
-          joinData: joinData
-        });
-        
-        this.getEditor().setReadOnly(false);
-        
-        // this.getEditor().on('selectionCheck', this._onSelectionCheck, this);
-      },
-      _onSelectionCheck: function (event) {
-        var selection = this.getEditor().getSelection();
-        var ranges = selection.getRanges(); 
-        var changed = true;
-        
-        if (this._lastSelectionRanges != null) {
-          var rangesLength = ranges.length;
-          if (this._lastSelectionRanges.length == rangesLength) {
-            changed = false;
-          
-            for (var i = 0; i < rangesLength; i++) {
-              var range = ranges[i];
-              var lastRange = this._lastSelectionRanges[i];
-              
-              if ((range.startOffset != lastRange.startOffset)||
-                (range.endOffset != lastRange.endOffset)||
-                (!range.startContainer.equals(lastRange.startContainer))||
-                (!range.endContainer.equals(lastRange.endContainer))
-              ) {
-                changed = true; 
-                break;
-              }
-            }
-          }
-        } 
-      
-        if (changed == true) {
-          var selectionRanges = new Array();
-          for (var i = 0, l = ranges.length; i < l; i++) {
-            selectionRanges.push(ranges[i].clone());
-          }
-          
-          this.getEditor().fire('CoOPS:SelectionChange', {
-            ranges: selectionRanges
-          });
-          
-          this._lastSelectionRanges = selectionRanges;
-        }
       }
     }
   });
@@ -298,8 +63,43 @@
     init: function( editor ) {  
       editor.on( 'instanceReady', function(event) {
         this._coOps = new CKEDITOR.coops.CoOps(this);
-        // TODO: Extensions into plugins
-        this._coOps.joinFile(['dmp'], PROTOCOL_VERSION);
+
+        var algorithms = new Array();
+        var connectors = new Array();
+        
+        var beforeJoinEvent = {
+          addAlgorithm: function (algorithm) {
+            algorithms.push(algorithm);
+          },
+          addConnector: function (connector) {
+            connectors.push(connector);
+          }
+        };
+        
+        this.fire("CoOPS:BeforeJoin", beforeJoinEvent);
+
+        var algorithmNames = new Array();
+        var requiredScripts = new Array();
+        
+        for (var i = 0, l = algorithms.length; i < l; i++) {
+          algorithmNames.push(algorithms[i].getName());
+          if (algorithms[i].getRequiredScripts()) {
+            requiredScripts = requiredScripts.concat(algorithms[i].getRequiredScripts());
+          }
+        }
+        
+        for (var i = 0, l = connectors.length; i < l; i++) {
+          if (connectors[i].getRequiredScripts()) {
+            requiredScripts = requiredScripts.concat(connectors[i].getRequiredScripts());
+          }
+        }
+        
+        CKEDITOR.scriptLoader.load(requiredScripts, function (completed, failed) {
+          this.fire("CoOPS:Join", {
+            protocolVersion: PROTOCOL_VERSION,
+            algorithms: algorithmNames
+          });
+        }, this, true);
       });
         
       editor.on('contentChange', function(event) {
@@ -307,23 +107,51 @@
       });
     
       editor.on('CoOPS:SessionStart', function(event) {
-        this._coOps.log("SessionStart: updated saved content");
+        if (window.console) {
+          console.log("SessionStart: updated saved content");
+        }
+        
         this._coOps.setSavedContent(this.getData());
       });
     
       editor.on('CoOPS:PatchAccepted', function(event) {
-        this._coOps.log("PatchAccepted: updated saved content");
+        if (window.console) {
+          console.log("PatchAccepted: updated saved content");
+        }
+
         this._coOps.setSavedContent(this.getData());
       });
     
       editor.on('CoOPS:ContentReverted', function(event) {
-        this._coOps.log("ContentReverted: updated saved content");
+        if (window.console) {
+          console.log("ContentReverted: updated saved content");
+        }
+
         this._coOps.setSavedContent(event.data.content);
       });
     
       editor.on('CoOPS:PatchApplied', function(event) {
-        this._coOps.log("PatchApplied: updated saved content");
+        if (window.console) {
+          console.log("PatchApplied: updated saved content");
+        }
+
         this._coOps.setSavedContent(event.data.content);
+      });
+      
+      editor.on("CoOPS:Joined", function (event) {
+        var content = event.data.content;
+        
+        this.getChangeObserver().pause();
+        try {
+          this.getSelection().removeAllRanges();
+          this.setData(content);
+        } finally {
+          this.getChangeObserver().reset();
+          this.getChangeObserver().resume();
+        }
+
+        this.fire("CoOPS:SessionStart", event.data);
+        this.setReadOnly(false);
       });
   
     }

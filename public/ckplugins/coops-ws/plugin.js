@@ -3,7 +3,7 @@ CKEDITOR.plugins.add('coops-ws', {
   init : function(editor) {
 
     CKEDITOR.coops.WebSocketConnector = CKEDITOR.tools.createClass({
-      base : CKEDITOR.coops.Connector,
+      base : CKEDITOR.coops.Feature,
       $ : function(editor) {
         this.base(editor);
 
@@ -31,18 +31,37 @@ CKEDITOR.plugins.add('coops-ws', {
             // Received a patch from other client
             if (editor.fire("CoOPS:PatchReceived", {
               patch : patch,
-              checksum: checksum
+              checksum: checksum,
+              revisionNumber: revisionNumber
             })) {
               this._revisionNumber = revisionNumber;
             };
           } else {
             // Our patch was accepted, yay!
             this._revisionNumber = message.revisionNumber;
+            if (window.console) {
+              console.log("Patch accepted, new revisionNumber: " + this._revisionNumber);
+            } 
+            
             this.getEditor().getChangeObserver().resume();
             this.getEditor().fire("CoOPS:PatchAccepted", {
               revisionNumber: this._revisionNumber
             });
           }
+        },
+        
+        _handleRevertMessage : function(message) {
+          var revisionNumber = message.revisionNumber;
+          var content = message.content;
+          
+          this._revisionNumber = revisionNumber;
+          if (window.console) {
+            console.log("Content reverted, new revisionNumber: " + this._revisionNumber);
+          }
+          
+          this.getEditor().fire("CoOPS:RevertedContentReceived", {
+            content: content
+          });
         },
 
         _cleanSelectionMarkers : function(clientId) {
@@ -251,9 +270,14 @@ CKEDITOR.plugins.add('coops-ws', {
 
         _onSessionStart : function(event) {
           try {
-            var joinData = event.data.joinData;
+            var joinData = event.data;
   
             this._revisionNumber = joinData.revisionNumber;
+            
+            if (window.console) {
+              console.log("Session started, revisionNumber: " + this._revisionNumber);
+            }
+            
             this._clientId = joinData.clientId;
             
             var webSocketUrl = null;
@@ -306,8 +330,9 @@ CKEDITOR.plugins.add('coops-ws', {
           }, this);
 
           this.getEditor().on("CoOPS:ContentPatch", this._onContentPatch, this);
-          this.getEditor().on("CoOPS:ContentReverted", this._onContentReverted, this);
-
+          this.getEditor().on("CoOPS:ContentRevert", this._onContentRevert, this);
+          
+          // this.getEditor().on("CoOPS:ContentReverted", this._onContentReverted, this);
           // this.getEditor().on("CoOPS:SelectionChange", this._onCoopsSelectionChange, this);
         },
 
@@ -323,10 +348,18 @@ CKEDITOR.plugins.add('coops-ws', {
           });
         },
         
+        _onContentRevert: function(event) {
+          // Someone is requesting for a content revert
+          this._sendWebSocketMessage({
+            type : 'revert'
+          });
+        },
+        
+        /**
         _onContentReverted: function (event) {
           this._revisionNumber = event.data.revisionNumber;
         },
-
+        **/
         _onCoopsSelectionChange : function(event) {
           var selections = new Array();
 
@@ -355,6 +388,9 @@ CKEDITOR.plugins.add('coops-ws', {
             case 'patch':
               this._handlePatchMessage(message);
             break;
+            case 'revert':
+              this._handleRevertMessage(message);
+            break;
             case 'selection':
               this._handleSelectionMessage(message);
             break;
@@ -366,7 +402,7 @@ CKEDITOR.plugins.add('coops-ws', {
         },
 
         _onWebSocketClose : function(event) {
-          alert('TODO: RECONNECT!');
+          // alert('TODO: RECONNECT!');
         }
       }
     });
@@ -385,8 +421,10 @@ CKEDITOR.plugins.add('coops-ws', {
       });
 
     });
-
-    var connector = new CKEDITOR.coops.WebSocketConnector(editor);
+    
+    editor.on('CoOPS:BeforeJoin', function(event) {
+      event.data.addConnector(new CKEDITOR.coops.WebSocketConnector(editor));
+    });
   },
   onLoad : function() {
 
