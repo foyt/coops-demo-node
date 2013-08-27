@@ -158,6 +158,15 @@ form input[type="submit"] {
 
 /* Edit View */
 
+.editor-status:before {
+  content: ' - ';
+}
+
+.editor-status {
+  font-size: 14px;
+  vertical-align: middle;
+}
+
 .collaborators-button {
   border: 1px outset #aaa;
   padding: 4px;

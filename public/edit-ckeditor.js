@@ -27,4 +27,22 @@ $(document).ready(function() {
     }
   }, 'Content loading...');
   
+  editor.on("CoOPS:WebSocketConnect", function (event) {
+    $('.editor-status').html('Loaded');
+  });
+
+  editor.on("CoOPS:ContentDirty", function (event) {
+    $('.editor-status').html('Unsaved');
+  });
+  
+  editor.on("CoOPS:ContentPatch", function (event) {
+    $('.editor-status').html('Saving...');
+  });
+  
+  editor.on("CoOPS:PatchAccepted", function (event) {
+    $('.editor-status').html('Saved');
+  });
+  
+  
+  
 });
