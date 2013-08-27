@@ -104,6 +104,7 @@
         
       editor.on('contentChange', function(event) {
         this._coOps.setUnsavedContent(event.data.currentContent);
+        editor.fire("CoOPS:ContentDirty");
       });
     
       editor.on('CoOPS:SessionStart', function(event) {
